@@ -1,0 +1,5 @@
+CLASS zbp_eho_i_singleton DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zeho_i_singleton.
+ENDCLASS.
+
+CLASS zbp_eho_i_singleton IMPLEMENTATION.
+ENDCLASS.
