@@ -11,6 +11,7 @@ define behavior for ZEHO_C_SINGLETON alias Singleton
   use action Prepare;
 
   use association _Bank { create ( augment ); with draft; }
+// use association _Bank { create ( augment );  }
 }
 
 define behavior for ZEHO_C_BANK alias Bank
@@ -22,8 +23,10 @@ define behavior for ZEHO_C_BANK alias Bank
   use update( augment );
   use delete;
 
-  use association _Singleton { with draft; }
+   use association _Singleton { with draft; }
   use association _Comps { create; with draft; }
+
+
 }
 
 define behavior for ZEHO_C_COMPS alias Comp
@@ -33,7 +36,7 @@ define behavior for ZEHO_C_COMPS alias Comp
 //  comp_desc;
   use update;
   use delete;
-
-  use association _Singleton { with draft; }
+    use association _Singleton { with draft; }
   use association _Banks { with draft; }
+
 }

@@ -53,7 +53,9 @@ authorization dependent by _Singleton
   LocalLastChangedAt;
 
   update ( features : global );
-  delete ( features : global );
+//  delete ( features : global );
+    delete ( features : instance );
+
 
   mapping for zeho_a_bank
     {
@@ -65,7 +67,8 @@ authorization dependent by _Singleton
     }
 
   association _Singleton { with draft; }
-    association _Comps { create ( features : global ); with draft; }
+  association _Comps { create ( features : global ); with draft; }
+
 }
 
 define behavior for ZEHO_I_COMPS alias Comp
@@ -74,10 +77,13 @@ draft table zeho_d_comp
 etag master LocalLastChangedAt
 lock dependent by _Singleton
 authorization dependent by _Singleton
-//early numbering
+//with additional save
+
 {
-//  field ( mandatory : create  )
-//  Bukrs;
+//burası commentliydi with additional save acıktı
+  field ( mandatory : create  )
+  Bukrs;
+//burası commentliydi with additional save acıktı
    field( readonly ) Bankcode;
 
   field ( readonly : update )
@@ -94,8 +100,10 @@ authorization dependent by _Singleton
   LastChangedAt,
   LocalLastChangedAt;
 
-  update ( features : global );
-  delete ( features : global );
+//  update ( features : instance );
+//  delete ( features : instance );
+   update ( features : global );
+   delete ( features : global );
 
   mapping for zeho_a_comp
     {
@@ -105,7 +113,10 @@ authorization dependent by _Singleton
       LastChangedAt      = LAST_CHANGED_AT;
       LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
       LocalLastChangedBy = local_last_changed_by;
+//      SingletonID        =
     }
+
    association _Singleton { with draft; }
    association _Banks { with draft; }
+
 }

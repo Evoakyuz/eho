@@ -5,6 +5,9 @@ CLASS lhc_Singleton DEFINITION INHERITING FROM cl_abap_behavior_handler.
        IMPORTING
           ENTITIES_CREATE FOR CREATE Singleton\_Bank
           ENTITIES_UPDATE FOR UPDATE Bank.
+*    METHODS augment_cba_Comps FOR MODIFY
+*      IMPORTING entities_Crete FOR CREATE Bank\_Comps.
+*                entities_update FOR UPDATE Comp.
 
 ENDCLASS.
 
@@ -44,6 +47,20 @@ CLASS lhc_Singleton IMPLEMENTATION.
 
 
   ENDMETHOD.
+
+*  METHOD augment_cba_Comps.
+*    DATA: text_for_new_entity      TYPE TABLE FOR CREATE zeho_i_bank\_Comps,
+*          text_for_existing_entity TYPE TABLE FOR CREATE zeho_i_bank\_Comps,
+*          text_update              TYPE TABLE FOR UPDATE zeho_i_comps.
+*    DATA: relates_create TYPE abp_behv_relating_tab,
+*          relates_update TYPE abp_behv_relating_tab,
+*          relates_cba    TYPE abp_behv_relating_tab.
+*    DATA: text_tky_link  TYPE STRUCTURE FOR READ LINK zeho_i_bank\_Comps,
+*          text_tky       LIKE text_tky_link-target.
+*
+*
+*
+*  ENDMETHOD.
 
 ENDCLASS.
 
