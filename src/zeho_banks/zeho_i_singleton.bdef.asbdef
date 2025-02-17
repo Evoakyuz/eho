@@ -145,7 +145,6 @@ authorization dependent by _Singleton
   LastChangedAt,
   LocalLastChangedAt;
 
-
   update ( features : global );
   delete ( features : global );
 
@@ -156,7 +155,7 @@ authorization dependent by _Singleton
       Host               = host;
       ContentType        = content_type;
       SoapAction         = soap_action;
-      ServUrl            = serv_url;
+      ServUrl            = serv_url  ;
       LastChangedAt      = LAST_CHANGED_AT;
       LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
       LocalLastChangedBy = local_last_changed_by;
