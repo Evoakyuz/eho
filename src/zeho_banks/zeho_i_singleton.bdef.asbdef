@@ -53,8 +53,8 @@ authorization dependent by _Singleton
   LocalLastChangedAt;
 
   update ( features : global );
-//  delete ( features : global );
-    delete ( features : instance );
+  //  delete ( features : global );
+  delete ( features : instance );
 
 
   mapping for zeho_a_bank
@@ -68,6 +68,8 @@ authorization dependent by _Singleton
 
   association _Singleton { with draft; }
   association _Comps { create ( features : global ); with draft; }
+  association _Serv { create ( features : global ); with draft; }
+  validation checkvalues on save { create; update; field Bankcode, bank_desc; }
 
 }
 
@@ -80,17 +82,14 @@ authorization dependent by _Singleton
 //with additional save
 
 {
-//burası commentliydi with additional save acıktı
-  field ( mandatory : create  )
+  field ( mandatory : create )
   Bukrs;
-//burası commentliydi with additional save acıktı
-   field( readonly ) Bankcode;
+  field ( readonly ) Bankcode;
 
   field ( readonly : update )
-//  Bankcode,
   Bukrs;
 
- field ( readonly )
+  field ( readonly )
   SingletonID,
   LastChangedAt,
   LocalLastChangedAt;
@@ -100,10 +99,8 @@ authorization dependent by _Singleton
   LastChangedAt,
   LocalLastChangedAt;
 
-//  update ( features : instance );
-//  delete ( features : instance );
-   update ( features : global );
-   delete ( features : global );
+  update ( features : global );
+  delete ( features : global );
 
   mapping for zeho_a_comp
     {
@@ -113,10 +110,60 @@ authorization dependent by _Singleton
       LastChangedAt      = LAST_CHANGED_AT;
       LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
       LocalLastChangedBy = local_last_changed_by;
-//      SingletonID        =
     }
 
-   association _Singleton { with draft; }
-   association _Banks { with draft; }
+  association _Singleton { with draft; }
+  association _Banks { with draft; }
 
 }
+
+
+// SERVIcE BEHAVIOUR
+define behavior for ZEHO_I_SERV alias Serv
+persistent table zeho_a_serv
+draft table zeho_d_serv
+etag master LocalLastChangedAt
+lock dependent by _Singleton
+authorization dependent by _Singleton
+//with additional save
+
+{
+  field ( mandatory : create )
+  Bukrs;
+  field ( readonly ) Bankcode;
+
+  field ( readonly : update )
+  Bukrs;
+
+  field ( readonly )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  field ( notrigger )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+
+  update ( features : global );
+  delete ( features : global );
+
+  mapping for zeho_a_serv
+    {
+      Bankcode           = Bankcode;
+      Bukrs              = Bukrs;
+      Host               = host;
+      ContentType        = content_type;
+      SoapAction         = soap_action;
+      ServUrl            = serv_url;
+      LastChangedAt      = LAST_CHANGED_AT;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+
+  association _Singleton { with draft; }
+  association _Banks { with draft; }
+
+}
+// SERVIcE BEHAVIOUR

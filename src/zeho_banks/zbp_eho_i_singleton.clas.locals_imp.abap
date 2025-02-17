@@ -1,3 +1,5 @@
+
+
 CLASS lhc_Singleton DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
 
@@ -26,6 +28,8 @@ CLASS lhc_Bank DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING REQUEST requested_features FOR Bank RESULT result.
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR Bank RESULT result.
+    METHODS checkvalues FOR VALIDATE ON SAVE
+      IMPORTING keys FOR bank~checkvalues.
 *    METHODS earlynumbering_cba_Comps FOR NUMBERING
 *      IMPORTING entities FOR CREATE Bank\_Comps.
 
@@ -51,6 +55,11 @@ CLASS lhc_Bank IMPLEMENTATION.
             exist(1),
             END OF lty_bank.
     DATA : lt_bank TYPE TABLE OF lty_bank.
+*    AUTHORITY-CHECK OBJECT 'OBJ'
+*
+*                    FOR USER sy-uname
+*                    FIELD 'BANKCODE' .
+
 
     SELECT DISTINCT data~*
 *                    COUNT(  )
@@ -60,48 +69,28 @@ CLASS lhc_Bank IMPLEMENTATION.
              INTO TABLE @DATA(lt_keys).
 
 
-*    LOOP AT lt_keys ASSIGNING FIELD-SYMBOL(<fs_key>).
-*       APPEND INITIAL LINE TO lt_bank ASSIGNING FIELD-SYMBOL(<fs_bank>).
-*       <fs_bank>-bankcode = <fs_key>-Bankcode.
-*       <fs_bank>-is_draft = <fs_key>-is_draft.
-*
-*
-*    ENDLOOP.
-
        result = VALUE #( FOR key IN lt_keys  (
                         %is_DRAFT = KEY-%is_draft
                         Bankcode  = KEY-Bankcode
                         %features-%delete  = if_abap_behv=>fc-o-disabled
                         ) ).
-*     result = VALUE #( FOR key IN KEYS  (
-*                        %is_DRAFT = KEY-%is_draft
-*                        Bankcode  = KEY-Bankcode
-*                        %features-%delete  = if_abap_behv=>fc-o-disabled
-*                        ) ).
 
-*     READ ENTITIES OF Bank IN LOCAL MODE
-*     ENTITY Bank
-*       FIELDS ( Bankcode )
-*       WITH CORRESPONDING #( keys )
-*     RESULT DATA(Banks)
-*     FAILED failed.
+  ENDMETHOD.
 
-*     SELECT count( * )
-*     from zeho_a_comp
-*     where bankcode = bank-
-
-
-    " evaluate the conditions, set the operation state, and set result parameter
-*    result = VALUE #( FOR bank IN Banks
-*                      ( %tky                   = travel-%tky
+  METHOD checkvalues.
+  READ ENTITIES OF ZEHO_I_SINGLETON IN LOCAL MODE
+    ENTITY Bank
+   FIELDS (  Bankcode bank_desc )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(Banks).
+*    if 1 = 2.
 *
-**                        %features-%update      = COND #( WHEN travel-OverallStatus = travel_status-accepted
-**                                                        THEN if_abap_behv=>fc-o-disabled ELSE if_abap_behv=>fc-o-enabled   )
-*                        %features-%delete      = COND #( WHEN travel-OverallStatus = travel_status-open
-*                                                        THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled   )
-*
-*                    ) ).
-*
+*    endif.
+*        READ ENTITIES OF ZEHO_I_BANK IN LOCAL MODE
+*      ENTITY Bank
+*        FIELDS ( Bankcode bank_desc  )
+*        WITH CORRESPONDING #( keys )
+*      RESULT DATA(travels).
 
   ENDMETHOD.
 
@@ -146,6 +135,23 @@ CLASS lsc_ZEHO_I_SINGLETON IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD cleanup_finalize.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+CLASS lhc_serv DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+  PRIVATE SECTION.
+
+    METHODS get_global_features FOR GLOBAL FEATURES
+      IMPORTING REQUEST requested_features FOR Serv RESULT result.
+
+ENDCLASS.
+
+CLASS lhc_serv IMPLEMENTATION.
+
+  METHOD get_global_features.
   ENDMETHOD.
 
 ENDCLASS.

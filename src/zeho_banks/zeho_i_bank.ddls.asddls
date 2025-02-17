@@ -13,6 +13,7 @@ define  view entity ZEHO_I_BANK
  association to parent ZEHO_I_SINGLETON as _Singleton
                     on  $projection.SingletonID = _Singleton.SingletonID
  composition [0..*] of ZEHO_I_COMPS as _Comps
+ composition [0..*] of ZEHO_I_SERV as _Serv
  //composition [0..*] of ZEHO_I_COMPS as _Comps
 
 {   
@@ -28,7 +29,8 @@ define  view entity ZEHO_I_BANK
       last_changed_at       as LastChangedAt,
        1 as SingletonID,
       _Comps,
-      _Singleton
+      _Singleton,
+      _Serv
 
 
 }

@@ -27,9 +27,18 @@ annotate entity ZEHO_C_BANK
     label: 'Company Codes', 
     position: 20 , 
     targetElement: '_Comps'
-  } ]
+  } ,
+   {
+    id: 'ZEHO_I_SERV', 
+    type: #LINEITEM_REFERENCE, 
+    label: 'Service Informations', 
+    position: 30 , 
+    targetElement: '_Serv'
+  }
+  
+   ]
     @UI.lineItem: [{ label: 'Bankcode' , position: 10 , cssDefault.width: '10rem' }]
-    @UI.identification: [{ label: 'Bankcode' }]
+    @UI.identification: [{ label: 'Bankcode' ,  position: 10  }]
 
     Bankcode;
     

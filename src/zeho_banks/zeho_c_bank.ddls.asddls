@@ -17,5 +17,6 @@ as projection on ZEHO_I_BANK
       LastChangedAt,
       SingletonID,
       _Comps : redirected to composition child ZEHO_C_COMPS,
-      _Singleton  : redirected to parent ZEHO_C_SINGLETON
+      _Singleton  : redirected to parent ZEHO_C_SINGLETON,
+      _Serv  : redirected to composition child ZEHO_C_SERV
 }
