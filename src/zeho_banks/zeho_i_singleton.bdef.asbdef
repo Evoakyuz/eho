@@ -26,6 +26,7 @@ authorization master ( global )
 
 
   association _Bank { create ( features : instance ); with draft; }
+
 }
 
 define behavior for ZEHO_I_BANK alias Bank
@@ -65,11 +66,12 @@ authorization dependent by _Singleton
       LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
       LocalLastChangedBy = local_last_changed_by;
     }
-
   association _Singleton { with draft; }
   association _Comps { create ( features : global ); with draft; }
   association _Serv { create ( features : global ); with draft; }
   validation checkvalues on save { create; update; field Bankcode, bank_desc; }
+  association _ReqM { create ( features : instance ); with draft; }
+  association _ResM { create ( features : instance ); with draft; }
 
 }
 
@@ -166,3 +168,101 @@ authorization dependent by _Singleton
 
 }
 // SERVIcE BEHAVIOUR
+
+//Request Mapping
+
+define behavior for ZEHO_I_REQ_MAPPING alias Req
+persistent table zeho_a_req_m
+draft table zeho_d_req_m
+etag master LocalLastChangedAt
+lock dependent by _Singleton
+authorization dependent by _Singleton
+//with additional save
+
+{
+  field ( mandatory : create )
+  InputTag;
+  field ( readonly ) Bankcode;
+
+  field ( readonly : update )
+  InputTag;
+
+  field ( readonly )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  field ( notrigger )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  update ( features : global );
+  delete ( features : global );
+
+  mapping for zeho_a_req_m
+    {
+      Bankcode           = Bankcode;
+      InputTag           = input_tag;
+      InputValue         = input_value;
+      LastChangedAt      = LAST_CHANGED_AT;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+
+  association _Singleton { with draft; }
+  association _Banks { with draft; }
+
+}
+
+//Request Mapping
+
+
+
+// Response Mapping
+
+define behavior for ZEHO_I_RESP_MAPPING alias Resp
+persistent table zeho_a_resp_m
+draft table zeho_d_resp_m
+etag master LocalLastChangedAt
+lock dependent by _Singleton
+authorization dependent by _Singleton
+//with additional save
+
+{
+  field ( mandatory : create )
+  RespTag;
+  field ( readonly ) Bankcode;
+
+  field ( readonly : update )
+  RespTag;
+
+  field ( readonly )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  field ( notrigger )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  update ( features : global );
+  delete ( features : global );
+
+  mapping for zeho_a_resp_m
+    {
+      Bankcode           = Bankcode;
+      RespTag            = resp_tag;
+      OutputValue        = output_value;
+      LastChangedAt      = LAST_CHANGED_AT;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+
+  association _Singleton { with draft; }
+  association _Banks { with draft; }
+
+}
+
+// Response Mapping

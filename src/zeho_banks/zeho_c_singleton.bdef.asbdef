@@ -26,7 +26,8 @@ define behavior for ZEHO_C_BANK alias Bank
   use association _Singleton { with draft; }
   use association _Comps { create; with draft; }
   use association _Serv { create; with draft; }
-
+  use association _ReqM { create; with draft; }
+  use association _ResM { create; with draft; }
 
 }
 
@@ -44,6 +45,32 @@ define behavior for ZEHO_C_COMPS alias Comp
 
 
 define behavior for ZEHO_C_SERV alias Serv
+{
+
+  //  field ( modify )
+  //  comp_desc;
+  use update;
+  use delete;
+  use association _Singleton { with draft; }
+  use association _Banks { with draft; }
+
+}
+
+
+define behavior for ZEHO_C_REQ_MAPPING alias Req
+{
+
+  //  field ( modify )
+  //  comp_desc;
+  use update;
+  use delete;
+  use association _Singleton { with draft; }
+  use association _Banks { with draft; }
+
+}
+
+
+define behavior for ZEHO_C_RESP_MAPPING alias Resp
 {
 
   //  field ( modify )

@@ -1,4 +1,4 @@
-@AccessControl.authorizationCheck: #NOT_REQUIRED
+@AccessControl.authorizationCheck: #NOT_ALLOWED
 @EndUserText.label: 'Consumption View For ZEHO_I_COMPS'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
@@ -13,6 +13,7 @@ define view entity ZEHO_C_COMPS
       }  }]
   key Bankcode,
   key Bukrs,
+      
       comp_desc,
       LocalLastChangedBy,
       LocalLastChangedAt,

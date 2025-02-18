@@ -1,3 +1,35 @@
+CLASS lhc_resp DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+  PRIVATE SECTION.
+
+    METHODS get_global_features FOR GLOBAL FEATURES
+      IMPORTING REQUEST requested_features FOR Resp RESULT result.
+
+ENDCLASS.
+
+CLASS lhc_resp IMPLEMENTATION.
+
+  METHOD get_global_features.
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS lhc_req DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+  PRIVATE SECTION.
+
+    METHODS get_global_features FOR GLOBAL FEATURES
+      IMPORTING REQUEST requested_features FOR Req RESULT result.
+
+ENDCLASS.
+
+CLASS lhc_req IMPLEMENTATION.
+
+  METHOD get_global_features.
+  ENDMETHOD.
+
+ENDCLASS.
+
 
 
 CLASS lhc_Singleton DEFINITION INHERITING FROM cl_abap_behavior_handler.
@@ -74,6 +106,8 @@ CLASS lhc_Bank IMPLEMENTATION.
                         Bankcode  = KEY-Bankcode
                         %features-%delete  = if_abap_behv=>fc-o-disabled
                         ) ).
+
+
 
   ENDMETHOD.
 

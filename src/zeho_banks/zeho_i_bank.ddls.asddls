@@ -14,6 +14,8 @@ define  view entity ZEHO_I_BANK
                     on  $projection.SingletonID = _Singleton.SingletonID
  composition [0..*] of ZEHO_I_COMPS as _Comps
  composition [0..*] of ZEHO_I_SERV as _Serv
+ composition [0..*] of ZEHO_I_REQ_MAPPING as _ReqM
+ composition [0..*] of ZEHO_I_RESP_MAPPING as _ResM
  //composition [0..*] of ZEHO_I_COMPS as _Comps
 
 {   
@@ -30,7 +32,9 @@ define  view entity ZEHO_I_BANK
        1 as SingletonID,
       _Comps,
       _Singleton,
-      _Serv
+      _Serv,
+      _ReqM, // request mapping
+      _ResM  // resposne mapping
 
 
 }
