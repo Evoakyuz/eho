@@ -3,14 +3,10 @@
 {
 "FROM":
 [
-"ZEHO_A_COMP"
+"ZEHO_A_ACTT"
 ],
 "ASSOCIATED":
-[
-"ZEHO_I_ACC",
-"ZEHO_I_BANK",
-"ZEHO_I_SINGLETON"
-],
+[],
 "BASE":
 [],
 "ANNO_REF":

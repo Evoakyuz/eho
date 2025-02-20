@@ -116,6 +116,7 @@ authorization dependent by _Singleton
 
   association _Singleton { with draft; }
   association _Banks { with draft; }
+  association _Acc { create ( features : global ); with draft; }
 
 }
 
@@ -264,5 +265,66 @@ authorization dependent by _Singleton
   association _Banks { with draft; }
 
 }
-
 // Response Mapping
+
+//Accounts
+
+define behavior for ZEHO_I_ACC alias ACC
+persistent table zeho_a_acc
+draft table zeho_d_acc
+etag master LocalLastChangedAt
+lock dependent by _Singleton
+authorization dependent by _Singleton
+//with additional save
+{
+  field ( mandatory : create )
+  Iban ,
+   Branch;
+  field ( readonly ) Bankcode , Bukrs;
+
+  field ( readonly : update )
+   Iban ,
+   Branch;
+
+  field ( readonly )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  field ( notrigger )
+  SingletonID,
+  LastChangedAt,
+  LocalLastChangedAt;
+
+  update ( features : global );
+  delete ( features : global );
+
+  mapping for zeho_a_acc
+    {
+      Bankcode           = Bankcode;
+      bukrs              = bukrs;
+      iban               = iban;
+      branch             = branch;
+      AcccountNo = acccount_no;
+      AccNoServ = acc_no_serv ;
+      AccSfxServ = acc_sfx_serv;
+      waers     = waers;
+      CustNo    = cust_no;
+      Username  = username;
+      Password  = password;
+      ClientId = client_id;
+      ClientSecret = client_secret;
+      AppKEy       = api_key;
+      UniqueNumber = unique_number;
+      Hkont        = hkont;
+      LastChangedAt      = LAST_CHANGED_AT;
+      LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+      LocalLastChangedBy = local_last_changed_by;
+    }
+
+  association _Singleton { with draft; }
+  association _Comp { with draft; }
+
+}
+
+//Accounts

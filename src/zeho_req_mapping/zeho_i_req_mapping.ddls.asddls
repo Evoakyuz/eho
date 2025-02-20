@@ -17,15 +17,18 @@ as select from zeho_a_req_m
 {   
    @Consumption.valueHelpDefinition: [{ entity: {
       name: 'ZEHO_VH_BANKCODES',
-      element: 'Bankcode'
-      }  }]
+      element: 'Bankcode'} 
+      
+       }]
     key cast(bankcode as bankk preserving type ) as Bankcode,
     
     key input_tag as InputTag,
      @Consumption.valueHelpDefinition: [{ entity: {
       name: 'ZEHO_VH_REQ_FIELDS',
       element: 'fieldname'
-      }  }]
+      }  ,
+      additionalBinding: [{ usage: #FILTER, element: 'tabname',  parameter: 'ZEHO_A_ACC'}] 
+      }]
     input_value as InputValue,
            1 as SingletonID,
       @Semantics.user.localInstanceLastChangedBy: true
@@ -36,5 +39,4 @@ as select from zeho_a_req_m
       last_changed_at                          as LastChangedAt,
       _Banks,
       _Singleton
-      
 }

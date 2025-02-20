@@ -7,4 +7,5 @@ define service ZEHO_UI_SINGLETON {
   expose ZEHO_C_SERV         as Serv;
   expose ZEHO_C_REQ_MAPPING  as Req;
   expose ZEHO_C_RESP_MAPPING as Resp;
+  expose ZEHO_C_ACC          as Acc;
 }

@@ -8,17 +8,24 @@
     dataClass: #MIXED
 }
 @ObjectModel.resultSet.sizeCategory: #XS 
+@Metadata.allowExtensions: true
 
+@Search.searchable: true
 define view  entity  ZEHO_VH_REQ_FIELDS 
- as select  distinct from  zeho_a_bank
+ as select  distinct from  zeho_a_tab_fld
           
 {   
     
 //    key bankcode,
 //    @ObjectModel.virtualElementCalculatedBy:    'ABAP:ZCL_EHO_AMDP'
-    key bankcode,
-    @ObjectModel.virtualElementCalculatedBy:    'ABAP:ZCL_EHO_AMDP'
-    cast('' as abap.char(30) ) as fieldname
+    @UI.hidden: true
+    key tabname,
+    @Search.defaultSearchElement: true
+    key fieldname
+    
+    
+//    @ObjectModel.virtualElementCalculatedBy:    'ABAP:ZCL_EHO_AMDP'
+//    cast('' as abap.char(30) ) as fieldname
     
   
 }

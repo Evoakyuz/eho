@@ -18,17 +18,29 @@ with
     id: 'ZEHO_I_COMPS', 
     purpose: #STANDARD, 
     type: #IDENTIFICATION_REFERENCE, 
-    label: 'Company Codes', 
-    position: 1 
-  } ]
+    label: 'Company', 
+    position: 10 
+  } 
   
-@UI.lineItem: [{ label: 'Bank Code' , position: 1 }]
-@UI.identification: [{ label : 'Bank Code' , position: 1 }]
+  ,
+  
+    {
+    id: 'ZEHO_I_ACC', 
+    type: #LINEITEM_REFERENCE, 
+    label: 'Accounts', 
+    position: 20 , 
+    targetElement: '_Acc'
+  }
+  
+  ]
+  
+@UI.lineItem: [{ label: 'Bank Code' , position: 10 }]
+@UI.identification: [{ label : 'Bank Code' , position: 10 }]
 Bankcode;
-@UI.lineItem: [{ label: 'Company Code' , position: 2  }]
-@UI.identification: [{ label : 'Company Code' , position: 2 }]
+@UI.lineItem: [{ label: 'Company Code' , position: 20  }]
+@UI.identification: [{ label : 'Company Code' , position: 20 }]
 Bukrs;
-@UI.lineItem: [{ label: 'Company Description' , position: 3 }]
-@UI.identification: [{ label : 'Company Description' , position: 3 }]
+@UI.lineItem: [{ label: 'Company Description' , position: 30 }]
+@UI.identification: [{ label : 'Company Description' , position: 30 }]
 comp_desc;
 }

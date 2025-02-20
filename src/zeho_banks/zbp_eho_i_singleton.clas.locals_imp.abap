@@ -1,3 +1,19 @@
+CLASS lhc_acc DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+  PRIVATE SECTION.
+
+    METHODS get_global_features FOR GLOBAL FEATURES
+      IMPORTING REQUEST requested_features FOR ACC RESULT result.
+
+ENDCLASS.
+
+CLASS lhc_acc IMPLEMENTATION.
+
+  METHOD get_global_features.
+  ENDMETHOD.
+
+ENDCLASS.
+
 CLASS lhc_resp DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
   PRIVATE SECTION.

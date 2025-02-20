@@ -1,0 +1,26 @@
+CLASS zcl_eho_sort_priority DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+  INTERFACES : IF_SADL_EXIT_SORT_TRANSFORM.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_eho_sort_priority IMPLEMENTATION.
+
+
+  METHOD if_sadl_exit_sort_transform~map_element.
+  if ET_SORT_ELEMENTS is INITIAL.
+    APPEND INITIAL LINE TO et_sort_elements ASSIGNING FIELD-SYMBOL(<FS_SORT>).
+    <fs_sort>-name = 'PRIORITY'.
+  endif.
+
+  ENDMETHOD.
+
+ENDCLASS.

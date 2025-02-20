@@ -40,6 +40,7 @@ define behavior for ZEHO_C_COMPS alias Comp
   use delete;
   use association _Singleton { with draft; }
   use association _Banks { with draft; }
+  use association _Acc { create; with draft; }
 
 }
 
@@ -79,5 +80,18 @@ define behavior for ZEHO_C_RESP_MAPPING alias Resp
   use delete;
   use association _Singleton { with draft; }
   use association _Banks { with draft; }
+
+}
+
+
+define behavior for ZEHO_C_ACC alias Acc
+{
+
+  //  field ( modify )
+  //  comp_desc;
+  use update;
+  use delete;
+  use association _Singleton { with draft; }
+  use association _Comp { with draft; }
 
 }

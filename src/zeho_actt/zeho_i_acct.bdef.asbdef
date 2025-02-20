@@ -1,0 +1,49 @@
+managed implementation in class zcl_bp_eho_i_acct unique;
+strict ( 2 );
+//with draft;
+define behavior for ZEHO_I_ACCT alias ACCT
+persistent table zeho_a_actt
+
+//etag
+//draft table zeho_d_actt
+//etag master Bankcode
+lock master
+authorization master ( instance )
+late numbering
+//etag master <field_name>
+{
+  create  { default function  ; }
+  update;
+  delete;
+  field ( readonly : update ) Bankcode, Bukrs, ActivityType, Priority;
+
+//  static function DefaultForCreate result [1] $self;
+//  draft action Activate optimized;
+//  draft action Discard;
+//  draft action ( features : instance ) Edit;
+//  draft action Resume;
+//   draft determine action Prepare
+//  {
+////    validation check_values;
+//  }
+
+
+  mapping for zeho_a_actt
+  {
+  Bankcode =  bankcode;
+  Bukrs    =  bukrs;
+  ActivityType = activity_type;
+  Priority     = priority;
+  Dc           = dc;
+  Blart        = blart;
+  VendorControl = vendor_control;
+  CustomerControl = customer_control;
+  Virementcontrol  = virement_control;
+  Secondglacc      = secondgl_acc;
+  Kostl            = kostl;
+  Prctr            = prctr;
+  Gsber            = gsber;
+  Cancelprocess    = cancel_process;
+
+  }
+}

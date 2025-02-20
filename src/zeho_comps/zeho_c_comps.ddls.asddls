@@ -20,6 +20,7 @@ define view entity ZEHO_C_COMPS
       LastChangedAt,
       SingletonID,
       _Banks : redirected to parent ZEHO_C_BANK,
-      _Singleton : redirected to ZEHO_C_SINGLETON
+      _Singleton : redirected to ZEHO_C_SINGLETON,
+      _Acc :  redirected to composition child ZEHO_C_ACC
 
 }

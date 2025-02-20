@@ -15,6 +15,7 @@ define view entity ZEHO_I_COMPS
   on $projection.Bankcode = _Banks.Bankcode
   
    association [1..1] to ZEHO_I_SINGLETON as _Singleton on $projection.SingletonID = _Singleton.SingletonID
+   composition [0..*] of ZEHO_I_ACC as _Acc
   //association to parent ZEHO_I_BANK as _Banks
 
 {
@@ -34,6 +35,7 @@ define view entity ZEHO_I_COMPS
       @Semantics.systemDateTime.lastChangedAt: true
       last_changed_at                          as LastChangedAt,
       _Banks,
-      _Singleton
+      _Singleton,
+      _Acc
 
 }

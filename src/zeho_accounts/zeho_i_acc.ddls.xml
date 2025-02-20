@@ -3,10 +3,10 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLS>
-    <DDLNAME>ZEHO_TF_REQ_FIELDNAME</DDLNAME>
+    <DDLNAME>ZEHO_I_ACC</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>Fieldname Table Function</DDTEXT>
-    <SOURCE_TYPE>F</SOURCE_TYPE>
+    <DDTEXT>Interface View - Accounts</DDTEXT>
+    <SOURCE_TYPE>W</SOURCE_TYPE>
    </DDLS>
   </asx:values>
  </asx:abap>
