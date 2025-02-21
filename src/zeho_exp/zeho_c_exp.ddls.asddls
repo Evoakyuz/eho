@@ -1,16 +1,15 @@
-@AccessControl.authorizationCheck: #NOT_ALLOWED
-@EndUserText.label: 'Consumption View For ZEHO_I_ACCT'
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Consumption View For ZEHO_I_EXP'
 @Metadata.ignorePropagatedAnnotations: true
 @Metadata.allowExtensions: true
-define root view entity ZEHO_C_ACCT
+define root view entity ZEHO_C_EXP
   provider contract transactional_query
-  as projection on ZEHO_I_ACCT
+  as projection on ZEHO_I_EXP
 {
-
       @Consumption.valueHelpDefinition: [{ entity: {
-       name: 'ZEHO_VH_BANKCODES',
-       element: 'Bankcode'
-       }  }]
+      name: 'ZEHO_VH_BANKCODES',
+      element: 'Bankcode'
+      }  }]
       @Consumption.filter.multipleSelections: false
       @Consumption.filter.selectionType: #SINGLE
       @Consumption.filter:{ mandatory:true }
@@ -25,45 +24,44 @@ define root view entity ZEHO_C_ACCT
       }]
   key Bukrs,
   key ActivityType,
-      @Consumption.valueHelpDefinition: [{ entity: {
-      name: 'ZEHO_VH_PRIORITY',
-      element: 'Priority'
-      }   }]
       @Consumption.filter.hidden: true
-  key Priority,
+  key Explanation,
       @Consumption.valueHelpDefinition: [{ entity: {
       name: 'ZEHO_VH_DEBIT_CREDIT',
       element: 'dc'
       }   }]
-      //     @Consumption.filter.defaultValue: 'All'
-      //     @Consumption.defaultValue: 'A'
-      //    @UI.defaultValue: 'All'
       @Consumption.filter.hidden: true
-      Dc,
+  key Dc,
       @Consumption.valueHelpDefinition: [{ entity: {
-        name: 'ZEHO_VH_BLART',
-        element: 'AccountingDocumentType'
-        }   }]
+      name: 'ZEHO_VH_BLART',
+      element: 'AccountingDocumentType'
+      }   }]
       @Consumption.filter.hidden: true
       Blart,
-      @Consumption.filter.hidden: true
-      VendorControl,
-      @Consumption.filter.hidden: true
-      CustomerControl,
-      @Consumption.filter.hidden: true
-      VirementControl,
 
+      @Consumption.valueHelpDefinition: [{ entity: {
+      name: 'I_Supplier_VH',
+      element: 'Supplier'
+      }   }]
+      @Consumption.filter.hidden: true
+      Lifnr,
+      @Consumption.valueHelpDefinition: [{ entity: {
+      name: 'I_Customer_VH',
+      element: 'Customer'
+      }   }]
+      @Consumption.filter.hidden: true
+      Kunnr,
       @Consumption.valueHelpDefinition: [{ entity: {
       name: 'I_OffsettingAccount',
       element: 'OffsettingAccount'
       }   }]
-      @EndUserText: { label:  'Offsetting Account' }
       @Consumption.filter.hidden: true
+      @EndUserText: { label:  'Offsetting Account' }
       SecondglAcc,
       @Consumption.valueHelpDefinition: [{ entity: {
-       name: 'I_CostCenterStdVH',
-       element: 'CostCenter'
-       }   }]
+      name: 'I_CostCenterStdVH',
+      element: 'CostCenter'
+      }   }]
       @Consumption.filter.hidden: true
       Kostl,
       @Consumption.valueHelpDefinition: [{ entity: {
@@ -71,15 +69,26 @@ define root view entity ZEHO_C_ACCT
       element: 'ProfitCenter'
       }   }]
       @Consumption.filter.hidden: true
-
       Prctr,
-
       @Consumption.valueHelpDefinition: [{ entity: {
       name: 'I_BusinessAreaStdVH',
       element: 'BusinessArea'
       }   }]
       @Consumption.filter.hidden: true
       Gsber,
+
+      @Consumption.valueHelpDefinition: [{ entity: {
+      name: 'I_SpecialGLCode',
+      element: 'SpecialGLCode'
+      }   }]
+      @Consumption.filter.hidden: true
+      Umskz,
+      @Consumption.valueHelpDefinition: [{ entity: {
+      name: 'I_TaxCodeStdVH',
+      element: 'TaxCode'
+      }   }]
+      @Consumption.filter.hidden: true
+      Mwskz,
       @Consumption.filter.hidden: true
       CancelProcess
 }

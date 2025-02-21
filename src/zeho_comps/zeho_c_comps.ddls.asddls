@@ -12,15 +12,18 @@ define view entity ZEHO_C_COMPS
       element: 'Bankcode'
       }  }]
   key Bankcode,
+      @Consumption.valueHelpDefinition: [{ entity: {
+      name: 'I_CompanyCodeVH',
+      element: 'CompanyCode'
+      }  }]
   key Bukrs,
-      
       comp_desc,
       LocalLastChangedBy,
       LocalLastChangedAt,
       LastChangedAt,
       SingletonID,
-      _Banks : redirected to parent ZEHO_C_BANK,
+      _Banks     : redirected to parent ZEHO_C_BANK,
       _Singleton : redirected to ZEHO_C_SINGLETON,
-      _Acc :  redirected to composition child ZEHO_C_ACC
+      _Acc       : redirected to composition child ZEHO_C_ACC
 
 }
