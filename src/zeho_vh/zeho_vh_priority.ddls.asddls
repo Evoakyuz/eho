@@ -22,14 +22,14 @@ define view entity ZEHO_VH_PRIORITY  as select from DDCDS_CUSTOMER_DOMAIN_VALUE_
 
 //    @UI.lineItem: [{ position: 1 }]
 //    @UI.hidden: false
-    @UI.lineItem: [{ position: 10  , label: 'ABC'}]
-    @UI.identification: [{ position: 10 , label: 'ABC'  }]
+//    @UI.lineItem: [{ position: 10  , label: 'ABC'}]
+//    @UI.identification: [{ position: 10 , label: 'ABC'  }]
      @ObjectModel.text.element: ['PriorityText']
  
     key value_low as Priority,
 //    @UI.hidden: false
-     @UI.lineItem: [{ position: 20  , label: 'ABC'}]
-        @UI.identification: [{ position: 20 , label: 'ABC' }]
+//     @UI.lineItem: [{ position: 20  , label: 'ABC'}]
+//        @UI.identification: [{ position: 20 , label: 'ABC' }]
            @ObjectModel.sort.transformedBy: 'ABAP:ZCL_EHO_SORT_PRIORITY'
     text as PriorityText
 } where language = $session.system_language

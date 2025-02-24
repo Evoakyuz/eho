@@ -46,6 +46,8 @@ define view entity ZEHO_I_ACC
 //      additionalBinding: [{ usage: #FILTER, element: 'CompanyCode', parameter: #(bukrs) }] 
       }]
       hkont                                    as Hkont,
+      begdate_format                           as BegdateFormat,
+      enddate_format                           as EnddateFormat,
       1                                        as SingletonID,
       @Semantics.user.localInstanceLastChangedBy: true
       local_last_changed_by                    as LocalLastChangedBy,

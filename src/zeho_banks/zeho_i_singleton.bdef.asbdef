@@ -317,6 +317,8 @@ authorization dependent by _Singleton
       AppKEy       = api_key;
       UniqueNumber = unique_number;
       Hkont        = hkont;
+      BegdateFormat = begdate_format;
+      EnddateFormat = enddate_format;
       LastChangedAt      = LAST_CHANGED_AT;
       LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
       LocalLastChangedBy = local_last_changed_by;

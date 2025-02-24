@@ -36,6 +36,8 @@ define view entity ZEHO_C_ACC
 //      additionalBinding: [{ usage: #FILTER, element: 'CompanyCode', parameter: #(bukrs) }] 
       }]
       Hkont,
+      BegdateFormat,
+      EnddateFormat,
       SingletonID,
       LocalLastChangedBy,
       LocalLastChangedAt,

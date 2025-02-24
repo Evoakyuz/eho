@@ -6,17 +6,10 @@ define root view entity ZEHO_I_ACCT
   as select from zeho_a_actt
 
 {
-//      @Consumption.valueHelpDefinition: [{ entity: {
-//       name: 'ZEHO_VH_BANKCODES',
-//       element: 'Bankcode'
-//       }  }]
+
   key cast(bankcode as bankk preserving type )  as Bankcode,
 
-//      @Consumption.valueHelpDefinition: [{ entity: {
-//       name: 'ZEHO_VH_BUKRS',
-//       element: 'Bukrs' },
-//       additionalBinding: [{ usage: #FILTER, element: 'Bankcode', parameter: #(Bankcode) }]
-//      }]
+
     key cast(bukrs as bukrs preserving type ) as Bukrs,
   key activity_type                             as ActivityType,
       @Consumption.valueHelpDefinition: [{ entity: {

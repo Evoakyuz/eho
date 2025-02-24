@@ -1,15 +1,18 @@
 projection ;
 //implementation in class zcl_bp_eho_c_acct unique;
-//strict ( 2 );
+strict ( 2 );
+use side effects;
 //use draft;
 define behavior for ZEHO_C_ACCT alias ACCT
-//use etag
+use etag
 
 {
   use create;
   use update;
   use delete;
 
+
+//   use action handle_checkbox;
    use function GetDefaultsForCreate;
 
 //  use action Activate;

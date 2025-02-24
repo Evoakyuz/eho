@@ -15,7 +15,8 @@ late numbering
   update;
   delete;
   field ( readonly : update ) Bankcode, Bukrs, ActivityType, Explanation, Dc;
-
+  field ( mandatory : create )  Bankcode, Bukrs, ActivityType, Explanation , Dc;
+  validation validate_record on save { create;  field Bankcode, Bukrs , ActivityType , Explanation , dc; }
     mapping for zeho_a_exp
   {
   Bankcode =  bankcode;

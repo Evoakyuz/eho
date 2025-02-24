@@ -48,6 +48,14 @@ CLASS zeho_cl_pre_run IMPLEMENTATION.
    INSERT  zeho_a_tab_fld  FROM TABLE @lt_fields .
 
 
+   DATA ls_bank TYPE zeho_a_bank.
+   DATA lt_bank TYPE TABLE OF zeho_a_bank.
+   ls_bank-bankcode = 'DUMMY'.
+   ls_bank-client = sy-mandt.
+   APPEND ls_bank TO lt_bank.
+   INSERT zeho_a_bank FROM  TABLE @lt_bank.
+
+
   ENDMETHOD.
 
 ENDCLASS.

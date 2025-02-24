@@ -23,22 +23,17 @@ annotate entity ZEHO_C_ACCT with
   ]
   
   
-  
-  
-
   @UI.lineItem: [ { position: 10 } ]
   @UI.selectionField: [ { position: 10  } ]
 
   @Search: {
   defaultSearchElement: true,
   fuzzinessThreshold: 0.7,
-  ranking: #HIGH
+  ranking: #MEDIUM
 
   }
 
-  @UI.identification: [{ position: 10 , qualifier: 'KEYS' }]
-  
-
+  @UI.identification: [{ position: 10 , qualifier: 'KEYS'  }]
   
   Bankcode;
   @UI.lineItem: [ { position: 20 } ]
@@ -49,6 +44,12 @@ annotate entity ZEHO_C_ACCT with
   @UI.lineItem: [ { position: 30 } ]
   @UI.selectionField: [ { position: 30 } ]
   @UI.identification: [{ position: 30  , qualifier: 'KEYS' }]
+    @Search: {
+  defaultSearchElement: true,
+  fuzzinessThreshold: 0.7,
+  ranking: #HIGH
+
+  }
   ActivityType;
   @UI.lineItem: [ { position: 40 } ]
   @UI.identification: [{ position: 40 , qualifier: 'KEYS' }]
