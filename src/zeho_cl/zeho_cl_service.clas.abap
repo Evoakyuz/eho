@@ -23,8 +23,6 @@ CLASS zeho_cl_service DEFINITION
         zeho_cl_messages .
 
 
-
-
   PROTECTED SECTION.
   PRIVATE SECTION.
     METHODS get_customization
@@ -45,6 +43,18 @@ CLASS zeho_cl_service DEFINITION
         !rd_acc TYPE REF TO zeho_s_acc
       RAISING
         zeho_cl_messages.
+    METHODS get_actt
+      IMPORTING
+        !t_aa   TYPE zeho_tt_aa
+      CHANGING
+        !t_actt TYPE zeho_tt_actt.
+
+    METHODS get_exp
+      IMPORTING
+        !t_aa  TYPE zeho_tt_aa
+      CHANGING
+        !t_exp TYPE zeho_tt_exp.
+
 ENDCLASS.
 
 
@@ -69,6 +79,7 @@ CLASS zeho_cl_service IMPLEMENTATION.
         t_acc    = zeho_service_if~t_accounts
     ).
 
+*    GET BADI me->instance.
     me->instance =  zeho_badi_service=>get_instance( ).
     imp_class_Tab = zeho_badi_service=>get_instance(  )->imps.
     imp_class = VALUE #( imp_class_Tab[ 1 ]  OPTIONAL ).
@@ -151,14 +162,11 @@ CLASS zeho_cl_service IMPLEMENTATION.
       ENDTRY.
 
       zeho_service_if~get_res(
-    rd_acc =  lrd_accounts
+       rd_acc =  lrd_accounts
 
-     ).
-
+      ).
 
     ENDLOOP.
-
-
 
   ENDMETHOD.
 
@@ -222,7 +230,6 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
 
     FIELD-SYMBOLS <fs_val> TYPE any.
-*    instance =   zeho_badi_service=>get_instance( ).
 
     IF imp_class IS BOUND.
       imp_class->get_request(
@@ -485,6 +492,8 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
     DATA lines TYPE i.
     DATA l_tabix TYPE i.
     DATA lt_respm TYPE zeho_tt_respm.
+    DATA lrd_accact TYPE REF TO zeho_s_aa.
+    CLEAR zeho_service_if~t_aa[].
     FIELD-SYMBOLS : <fs_val> TYPE any.
 
     IF imp_class IS BOUND.
@@ -494,6 +503,7 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
         CHANGING
           xml_table = zeho_service_if~t_xmltab
           xresponse = zeho_service_if~xml_resx
+          t_acc     = zeho_service_if~t_aa
       ).
     ENDIF.
     CLEAR lt_respm.
@@ -510,23 +520,19 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
         l_tabix = l_tabix + 1.
 
       ENDLOOP.
-      """Daha sonra comment kaldırılacak
-      IF rd_acc->unique_number IS NOT INITIAL. "AND zeho_service_if~acc_activity_t IS INITIAL.
-*             APPEND INITIAL LINE TO ZSOA_EHO_service_if~acc_activity_t REFERENCE INTO lrd_accact.
-*        lrd_accact->bankcode = rd_acc->bankcode.
-*        lrd_accact->bukrs = rd_acc->bukrs.
-*        lrd_accact->branch = rd_acc->branch.
-*        lrd_accact->bankn = rd_acc->bankn.
-*        lrd_accact->iban = rd_acc->iban.
-*        lrd_accact->waers = rd_acc->waers.
-*        lrd_accact->processing_date = sy-datum.
-*        lrd_accact->processing_time = sy-uzeit.
-        """Daha sonra comment kaldırılacak
+      IF rd_acc->unique_number IS NOT INITIAL AND zeho_service_if~t_aa IS INITIAL.
+        APPEND INITIAL LINE TO zeho_service_if~t_aa REFERENCE INTO lrd_accact.
+        lrd_accact->bankcode = rd_acc->bankcode.
+        lrd_accact->bukrs = rd_acc->bukrs.
+        lrd_accact->branch = rd_acc->branch.
+        lrd_accact->acccount_no = rd_acc->acccount_no.
+        lrd_accact->iban = rd_acc->iban.
+        lrd_accact->waers = rd_acc->waers.
         LOOP AT lt_respm REFERENCE INTO  lrd_map.
           lrd_xml = REF #( zeho_service_if~t_xmltab[ cname = lrd_map->resp_tag  ]  OPTIONAL ).
           IF lrd_xml->cname IS NOT INITIAL .
             l_tabix = sy-tabix.
-**        ASSIGN COMPONENT lrd_map->output_value OF STRUCTURE lrd_accact->* TO <fs_val>.
+            ASSIGN COMPONENT lrd_map->output_value OF STRUCTURE lrd_accact->* TO <fs_val>.
             IF <fs_val> IS ASSIGNED.
               <fs_val> =  lrd_xml->cvalue.
             ENDIF.
@@ -534,14 +540,14 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
           ENDIF.
         ENDLOOP.
 
-      ELSEIF   rd_acc->unique_number IS NOT INITIAL ." AND ZSOA_EHO_service_if~acc_activity_t IS NOT INITIAL
+      ELSEIF   rd_acc->unique_number IS NOT INITIAL  AND zeho_service_if~t_aa IS NOT INITIAL.
         IF imp_class IS NOT BOUND.
           imp_class->non_unique_parsing(
           EXPORTING
             rd_acc = rd_acc
             accounts_t = zeho_service_if~t_accounts
-*        CHANGING
-*         acc_activity_t = ZSOA_EHO_service_if~acc_activity_t
+          CHANGING
+            t_aa =  zeho_service_if~t_aa
           ).
         ENDIF.
       ELSE.
@@ -556,6 +562,39 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
 
 
+      DELETE zeho_service_if~t_aa WHERE amount IS INITIAL.
+
+      IF imp_class IS NOT BOUND.
+        me->get_actt(
+          EXPORTING
+         t_aa =  zeho_service_if~t_aa
+            CHANGING
+        t_actt = zeho_service_if~t_actt  ).
+
+        me->get_exp(
+        EXPORTING
+          t_aa = zeho_service_if~t_aa
+        CHANGING
+          t_exp = zeho_service_if~t_exp ).
+
+        imp_class->final_processing(
+       EXPORTING
+         t_actt = zeho_service_if~t_actt[]
+         t_exp  = zeho_service_if~t_exp[]
+       CHANGING
+         t_aa  = zeho_service_if~t_aa ).
+
+      ENDIF.
+
+       DATA lt_aa TYPE TABLE OF zeho_a_aa.
+       CLEAR lt_aa.
+       lt_aa = CORRESPONDING #( zeho_service_if~t_aa  MAPPING client = DEFAULT sy-mandt ).
+
+      MODIFY zeho_a_aa FROM TABLE @lt_aa.
+      COMMIT WORK AND WAIT.
+
+
+
     ELSE.
       RAISE EXCEPTION TYPE zeho_cl_messages
         EXPORTING
@@ -564,26 +603,30 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
     ENDIF.
 
 
-*    DELETE ZSOA_EHO_service_if~acc_activity_t WHERE amount IS INITIAL.
-
-    IF imp_class IS NOT BOUND.
-*      me->get_actt(
-*        EXPORTING
-*     t_acc =  ZSOA_EHO_service_if~acc_activity_t
-*          CHANGING
-*    t_actt = t_acct  ).
-
-*      me->get_exp(
-*      EXPORTING
-*        t_acc = ZSOA_EHO_service_if~acc_activity_t
-*      CHANGING
-*        t_exp = t_exp ).
 
 
-*    imp_class->
 
-    ENDIF.
+  ENDMETHOD.
 
+  METHOD get_actt.
+
+    CLEAR t_actt[].
+    SELECT * FROM ZEHO_a_actt  AS actt
+    INNER JOIN @t_aa AS data
+             ON data~bankcode = actt~bankcode
+            AND data~bukrs    = actt~bukrs
+           INTO CORRESPONDING FIELDS OF TABLE  @t_actt.
+
+  ENDMETHOD.
+
+
+  METHOD get_exp.
+    CLEAR t_exp[].
+    SELECT * FROM ZEHO_a_actt  AS exp
+    INNER JOIN @t_aa AS data
+             ON data~bankcode = exp~bankcode
+            AND data~bukrs    = exp~bukrs
+           INTO CORRESPONDING FIELDS OF TABLE  @t_exp.
 
   ENDMETHOD.
 

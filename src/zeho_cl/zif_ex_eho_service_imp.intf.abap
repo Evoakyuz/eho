@@ -34,16 +34,21 @@ INTERFACE zif_ex_eho_service_imp
       !RD_ACC type ref to zeho_s_acc
     changing
       !XML_TABLE type ZEHO_TT_XML_TABLE
-      !XRESPONSE type XSTRING.
-*      !T_ACC type ZSOA_EHO_TT_AA .
+      !XRESPONSE type XSTRING
+      !T_ACC type Zeho_TT_AA .
 
       methods NON_UNIQUE_PARSING default ignore
     importing
       !ACCOUNTS_T type zeho_tt_acc
-      !RD_ACC type ref to zeho_s_acc.
-*    changing
-*      !ACC_ACTIVITY_T type ZSOA_EHO_TT_AA .
+      !RD_ACC type ref to zeho_s_acc
+    changing
+      !t_aa type zeho_tt_aa .
 
-
+      methods FINAL_PROCESSING
+      IMPORTING
+      t_actt TYPe  zeho_tt_actt
+      T_EXP TYPE  zeho_tt_exp
+      changing
+      T_AA  TYPE zeho_tt_aa.
 
 ENDINTERFACE.
