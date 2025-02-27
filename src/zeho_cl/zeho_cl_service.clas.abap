@@ -17,8 +17,8 @@ CLASS zeho_cl_service DEFINITION
         !bukrs    TYPE zeho_tt_bukrs_range OPTIONAL
         !account  TYPE zeho_tt_acc_range OPTIONAL
 *      !LOG type ref to ZSOA_EHO_CL_APP_LOG optional
-        !begdate  TYPE datum OPTIONAL
-        !enddate  TYPE datum OPTIONAL
+        !begdate  TYPE datum
+        !enddate  TYPE datum
       RAISING
         zeho_cl_messages .
 
@@ -80,6 +80,7 @@ CLASS zeho_cl_service IMPLEMENTATION.
     ).
 
 *    GET BADI me->instance.
+
     me->instance =  zeho_badi_service=>get_instance( ).
     imp_class_Tab = zeho_badi_service=>get_instance(  )->imps.
     imp_class = VALUE #( imp_class_Tab[ 1 ]  OPTIONAL ).
@@ -107,7 +108,8 @@ CLASS zeho_cl_service IMPLEMENTATION.
                                         WHERE bankcode = lrd_accounts->bankcode
                                           AND bukrs = lrd_accounts->bukrs
                                           AND iban <> lrd_accounts->iban
-                                          AND unique_number <> lrd_accounts->unique_number.
+                                          AND ( unique_number = lrd_accounts->unique_number
+                                           OR unique_number IS INITIAL ).
           EXIT.
         ENDLOOP.
         IF sy-subrc = 0.
@@ -171,11 +173,12 @@ CLASS zeho_cl_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_customization.
-    SELECT * FROM zeho_a_acc
-WHERE bankcode IN @bankcode
-AND bukrs IN @bukrs
-AND acccount_no IN @account
-INTO CORRESPONDING FIELDS OF TABLE @t_acc.
+    SELECT *
+     FROM zeho_a_acc
+    WHERE bankcode IN @bankcode
+    AND bukrs IN @bukrs
+    AND acccount_no IN @account
+    INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
     IF sy-subrc = 0.
 
@@ -213,9 +216,10 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
       SELECT bankcode ,
         resp_tag ,
         output_value
-   FROM zeho_a_resp_m
-  WHERE bankcode IN @bankcode
-  INTO TABLE @t_respm.
+        FROM zeho_a_resp_m
+       WHERE bankcode IN @bankcode
+        INTO TABLE @t_respm.
+
       IF sy-subrc <> 0.
         RAISE EXCEPTION TYPE zeho_cl_messages
           EXPORTING
@@ -244,31 +248,32 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
     LOOP AT zeho_service_if~t_reqm ASSIGNING FIELD-SYMBOL(<fs_mapping>).
       ASSIGN COMPONENT <fs_mapping>-input_value OF STRUCTURE rd_acc->* TO <fs_val>.
+      IF <fs_val> IS ASSIGNED.
+        CASE <fs_mapping>-input_tag.
+          WHEN 'BEGDATE_FORMAT'.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
+            REPLACE 'YYYY' IN  zeho_service_if~xml WITH begdate(4).
+            REPLACE 'MM' IN  zeho_service_if~xml WITH begdate+4(2).
+            REPLACE 'DD' IN  zeho_service_if~xml WITH begdate+6(2).
+            REPLACE 'HH' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'MM' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'SS' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
+          WHEN 'ENDDATE_FORMAT'.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
+            REPLACE 'YYYY' IN  zeho_service_if~xml WITH enddate(4).
+            REPLACE 'MM' IN  zeho_service_if~xml WITH enddate+4(2).
+            REPLACE 'DD' IN  zeho_service_if~xml WITH enddate+6(2).
+            REPLACE 'HH' IN  zeho_service_if~xml WITH '23'.
+            REPLACE 'MM' IN  zeho_service_if~xml WITH '59'.
+            REPLACE 'SS' IN  zeho_service_if~xml WITH '59'.
+            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
+          WHEN OTHERS.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
 
-      CASE <fs_mapping>-input_tag.
-        WHEN 'BEGDATE_FORMAT'.
-          REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-          REPLACE 'YYYY' IN  zeho_service_if~xml WITH begdate(4).
-          REPLACE 'MM' IN  zeho_service_if~xml WITH begdate+4(2).
-          REPLACE 'DD' IN  zeho_service_if~xml WITH begdate+6(2).
-          REPLACE 'HH' IN  zeho_service_if~xml WITH '00'.
-          REPLACE 'MM' IN  zeho_service_if~xml WITH '00'.
-          REPLACE 'SS' IN  zeho_service_if~xml WITH '00'.
-          REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
-        WHEN 'ENDDATE_FORMAT'.
-          REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-          REPLACE 'YYYY' IN  zeho_service_if~xml WITH enddate(4).
-          REPLACE 'MM' IN  zeho_service_if~xml WITH enddate+4(2).
-          REPLACE 'DD' IN  zeho_service_if~xml WITH enddate+6(2).
-          REPLACE 'HH' IN  zeho_service_if~xml WITH '23'.
-          REPLACE 'MM' IN  zeho_service_if~xml WITH '59'.
-          REPLACE 'SS' IN  zeho_service_if~xml WITH '59'.
-          REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
-        WHEN OTHERS.
-          REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-
-      ENDCASE.
-
+        ENDCASE.
+        UNASSIGN <fs_val>.
+      ENDIF.
 
     ENDLOOP.
 
@@ -309,7 +314,8 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
           accept      TYPE string,
           ls_serv     TYPE zeho_s_serv.
 
-    ls_serv = VALUE #( zeho_service_if~t_serv[ bankcode = rd_acc->bankcode  ]  OPTIONAL ).
+    ls_serv = VALUE #( zeho_service_if~t_serv[ bankcode = rd_acc->bankcode
+                                               bukrs    = rd_acc->bukrs ]  OPTIONAL ).
 
     url         = ls_serv-serv_url.
     username    = rd_acc->username.
@@ -407,13 +413,14 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
     IF lv_http_code BETWEEN 200 AND 299.
       "Succesfull
 
-    ELSE.
+    ELSEIF lv_http_code GE 100.
       "Error
       EXIT.
     ENDIF.
 
 
     zeho_service_if~xml_resx = zeho_service_if~response->get_binary(  ).
+    DATA(lv_response) = zeho_service_if~response->get_text( ).
     xml_parser( ).
 
     map_xmltable_to_db( rd_acc = rd_acc ).
@@ -427,6 +434,7 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
     CLEAR zeho_service_if~t_xmltab.
     DATA(reader) = cl_sxml_string_reader=>create( zeho_service_if~xml_resx ).
+
     DO.
       DATA(node) = reader->read_next_node( ).
       IF reader->node_type = if_sxml_node=>co_nt_final.
@@ -436,55 +444,60 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
       IF reader->node_type = if_sxml_node=>co_nt_element_open.
         last_open_tag = CAST if_sxml_open_element( node ).
 
-*        CASE to_upper( reader->name ).
-*          WHEN 'MYROOT'.
-*            result-head_key         = last_open_tag->get_attribute_value( name = 'key' )->get_value( ).
-*            result-head_description = last_open_tag->get_attribute_value( name = 'description' )->get_value( ).
-*        ENDCASE.
       ENDIF.
 
       IF reader->node_type <> if_sxml_node=>co_nt_value.
         CONTINUE.
       ENDIF.
 
-      last_open_tag->get_attributes(
-        RECEIVING
-          attributes =  attributes
-      ).
-*     read table attributes INTO DATA(ls_attribute)
-*      with key TABLE_LINE->QNAME-NAME      = NAME
-*               TABLE_LINE->QNAME-NAMESPACE = NSURI
-*      into L_ATT.
+      APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
+      <fs_xml>-cname  = reader->name.
+      <fs_xml>-cvalue = reader->value.
 
-*      READ TABLE attributes INTO DATA(ls_attribute) INDEX 1.
-      LOOP AT attributes INTO DATA(ls_attribute).
-        APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
-        <fs_xml>-cname = ls_attribute->qname-name.
-        <fs_xml>-cvalue = last_open_tag->get_attribute_value( name =  ls_attribute->qname-name )->get_value( ).
-      ENDLOOP.
-*      CASE to_upper( reader->name ).
-*        WHEN 'DESCRIPTION'.
-**          result-description = reader->value.
-*          last_open_tag->get_attributes(
-*            RECEIVING
-*              attributes =
-*          ).
-**          result-desc_length = last_open_tag->get_attribute_value( name = 'length' )->get_value( ).
-**          result-desc_space  = last_open_tag->get_attribute_value( name = 'space' )->get_value( ).
-*
-*        WHEN 'ITEM'.
-*          INSERT INITIAL LINE INTO TABLE result-peoples REFERENCE INTO person.
-*          person->height = last_open_tag->get_attribute_value( name = 'height' )->get_value( ).
-*          person->name   = reader->value.
-*
-*        WHEN OTHERS.
-*          ASSIGN COMPONENT to_upper( reader->name ) OF STRUCTURE result TO FIELD-SYMBOL(<line>).
-*          IF sy-subrc = 0.
-*            <line> = reader->value.
-*          ENDIF.
-*      ENDCASE.
 
     ENDDO.
+
+
+    TRY.
+        DO.
+          reader->next_node( ).
+          IF reader->node_type = if_sxml_node=>co_nt_final.
+            EXIT.
+          ENDIF.
+
+
+          DATA(node_type)    = SWITCH #( reader->node_type WHEN if_sxml_node=>co_nt_initial THEN `CO_NT_INITIAL`
+                                                            WHEN if_sxml_node=>co_nt_element_open THEN `CO_NT_ELEMENT_OPEN`
+                                                            WHEN if_sxml_node=>co_nt_element_close THEN `CO_NT_ELEMENT_CLOSE`
+                                                            WHEN if_sxml_node=>co_nt_value THEN `CO_NT_VALUE`
+                                                            WHEN if_sxml_node=>co_nt_attribute THEN `CO_NT_ATTRIBUTE`
+                                                            ELSE `Error` ).
+*          "Name of the element
+*          node_info-name = reader->name.
+*          "Character-like value (if it is textual data)
+*          node_info-value = COND #( WHEN reader->node_type = if_sxml_node=>co_nt_value THEN reader->value ).
+*          APPEND node_info TO nodes_tab.
+          .
+          IF reader->node_type = if_sxml_node=>co_nt_element_open.
+            DO.
+              reader->next_attribute( ).
+
+              IF reader->node_type <> if_sxml_node=>co_nt_attribute.
+                EXIT.
+              ENDIF.
+              APPEND VALUE #( "node_type  = `CO_NT_ATTRIBUTE`
+                              cname       = reader->name
+                              cvalue      = reader->value ) TO zeho_service_if~t_xmltab.
+            ENDDO.
+          ENDIF.
+        ENDDO.
+      CATCH cx_sxml_state_error INTO DATA(error_parse_token).
+        DATA(error_text) = error_parse_token->get_text( ).
+    ENDTRY.
+
+
+
+
 
   ENDMETHOD.
 
@@ -586,9 +599,9 @@ INTO CORRESPONDING FIELDS OF TABLE @t_acc.
 
       ENDIF.
 
-       DATA lt_aa TYPE TABLE OF zeho_a_aa.
-       CLEAR lt_aa.
-       lt_aa = CORRESPONDING #( zeho_service_if~t_aa  MAPPING client = DEFAULT sy-mandt ).
+      DATA lt_aa TYPE TABLE OF zeho_a_aa.
+      CLEAR lt_aa.
+      lt_aa = CORRESPONDING #( zeho_service_if~t_aa  MAPPING client = DEFAULT sy-mandt ).
 
       MODIFY zeho_a_aa FROM TABLE @lt_aa.
       COMMIT WORK AND WAIT.
