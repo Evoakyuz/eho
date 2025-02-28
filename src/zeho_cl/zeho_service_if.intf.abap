@@ -24,6 +24,7 @@ INTERFACE zeho_service_if
   constants C_CONTENTLENGTH type STRING value 'Content-Length' ##NO_TEXT.
   constants C_SOAPACTION type STRING value 'SOAPAction' ##NO_TEXT.
   constants C_ENCODING type ABAP_ENCODING value '4103' ##NO_TEXT.
+  CONSTANTS c_soap(4)  VALUE 'soap'.
 *  constants C_BADI type EXIT_DEF value 'zsoa_eho_REG_IMP' ##NO_TEXT.
 
   constants C_ACCEPT type STRING value 'Accept' ##NO_TEXT.

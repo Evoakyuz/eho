@@ -1,0 +1,148 @@
+@Metadata.layer: #CORE
+@UI: {
+  headerInfo: {
+    typeName: 'Activities',
+    typeNamePlural: 'Activities',
+    title: {
+      type: #STANDARD,
+      label: 'bankcode'
+    }
+  }
+}
+
+//@Search.searchable: true
+annotate entity ZEHO_I_ACTIVITIES_CUSTOM with
+{
+
+
+
+
+
+  @UI.hidden           : true
+  client;
+  @Consumption.valueHelpDefinition: [{ entity: {
+    name: 'ZEHO_VH_BANKCODES',
+    element: 'Bankcode'
+    }
+     }]
+  @UI.selectionField: [ { position: 10  }  ]
+  @Consumption.filter.multipleSelections: false
+  @Consumption.filter:{ mandatory:true }
+
+  @UI.lineItem         : [{ position: 10 }]
+  bankcode;
+  @Consumption.valueHelpDefinition: [{ entity:
+     {
+     name: 'ZEHO_VH_BUKRS',
+     element: 'Bukrs'
+     }
+     }]
+  @UI.selectionField: [ { position: 20  }  ]
+  @Consumption.filter.multipleSelections: false
+  @Consumption.filter.selectionType: #SINGLE
+  @Consumption.filter:{ mandatory:true }
+  @UI.lineItem         : [{ position: 20 }]
+  bukrs;
+  @UI.lineItem         : [{ position: 30 }]
+  @Consumption.filter.hidden: true
+  iban;
+  @UI.lineItem         : [{ position: 40 }]
+  @Consumption.filter.hidden: true
+  branch;
+  @UI.lineItem         : [{ position: 50 , hidden: true }]
+  @Consumption.filter.hidden: true
+  acccount_no;
+  @UI.lineItem         : [{ position: 60 , hidden: true }]
+  @UI.selectionField: [ { position: 30  }  ]
+ 
+     @Consumption.filter: {
+       mandatory: true,
+       selectionType: #INTERVAL ,
+       defaultValue: '#SYSTEM_DATE',
+       defaultValueHigh: '#SYSTEM_DATE',
+       multipleSelections: false
+
+   }
+  act_date;
+  @UI.lineItem         : [{ position: 70 , hidden: true }]
+  @Consumption.filter.hidden: true
+  act_time;
+  @UI.lineItem         : [{ position: 80 , hidden: true }]
+  @Consumption.filter.hidden: true
+  act_no;
+  @UI.lineItem         : [{ position: 90  }]
+  @Consumption.filter.hidden: true
+  description;
+  @UI.lineItem         : [{ position: 100 }]
+  @Consumption.filter.hidden: true
+  shkzg;
+  @UI.lineItem         : [{ position: 110  }]
+  @Consumption.filter.hidden: true
+  amount;
+  @UI.lineItem         : [{ position: 120 , hidden: true }]
+  @Consumption.filter.hidden: true
+  instant_amount;
+  @UI.lineItem         : [{ position: 130  }]
+  @Consumption.filter.hidden: true
+  waers;
+  @UI.lineItem         : [{ position: 140 , hidden: true }]
+  @Consumption.filter.hidden: true
+  activity_type;
+  @UI.lineItem         : [{ position: 150 , hidden: true }]
+  @Consumption.filter.hidden: true
+  activity_explanation;
+  @UI.lineItem         : [{ position: 160 , hidden: true }]
+  @Consumption.filter.hidden: true
+  sender_iban;
+  @UI.lineItem         : [{ position: 170 , hidden: true }]
+  @Consumption.filter.hidden: true
+  sender_vkn;
+  @UI.lineItem         : [{ position: 180 , hidden: true }]
+  @Consumption.filter.hidden: true
+  debited_vkn;
+  @UI.lineItem         : [{ position: 190 , hidden: true }]
+  @Consumption.filter.hidden: true
+  sender_name;
+  @UI.lineItem         : [{ position: 200 , hidden: true }]
+  @Consumption.filter.hidden: true
+  sender_bank;
+  @UI.lineItem         : [{ position: 210 , hidden: true }]
+  @Consumption.filter.hidden: true
+  customer_ref;
+  @UI.lineItem         : [{ position: 220  }]
+  @Consumption.filter.hidden: true
+  belnr;
+  @UI.lineItem         : [{ position: 230 , hidden: true }]
+  @Consumption.filter.hidden: true
+  gjahr;
+  @UI.lineItem         : [{ position: 240  }]
+  @Consumption.filter.hidden: true
+  blart;
+  @UI.lineItem         : [{ position: 250  }]
+  @Consumption.filter.hidden: true
+  lifnr;
+  @UI.lineItem         : [{ position: 260  }]
+  @Consumption.filter.hidden: true
+  kunnr;
+  @UI.lineItem         : [{ position: 270 }]
+  @Consumption.filter.hidden: true
+  secondgl_acc;
+  @UI.lineItem         : [{ position: 280 , hidden: true }]
+  @Consumption.filter.hidden: true
+  kostl;
+  @UI.lineItem         : [{ position: 290 , hidden: true }]
+  @Consumption.filter.hidden: true
+  prctr;
+  @UI.lineItem         : [{ position: 300 , hidden: true }]
+  @Consumption.filter.hidden: true
+  gsber;
+  @UI.lineItem         : [{ position: 310 , hidden: true }]
+  @Consumption.filter.hidden: true
+  umskz;
+  @UI.lineItem         : [{ position: 320 , hidden: true }]
+  @Consumption.filter.hidden: true
+  mwskz;
+  @UI.lineItem         : [{ position: 330 , hidden: true }]
+  @Consumption.filter.hidden: true
+  cancel_process;
+}

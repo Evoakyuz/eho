@@ -1,0 +1,4 @@
+@EndUserText.label: 'Servis Definition for ZEHO_I_ACTIVITIES_CUSTOM'
+define service ZEHO_UI_ACTIVITIES {
+  expose ZEHO_I_ACTIVITIES_CUSTOM as Activities;
+}

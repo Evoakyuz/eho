@@ -80,10 +80,18 @@ CLASS zeho_cl_service IMPLEMENTATION.
     ).
 
 *    GET BADI me->instance.
+     DATA g_exception TYPE REF TO cx_root.
+    TRY.
+        me->instance =  zeho_badi_service=>get_instance( ).
+        imp_class_Tab = zeho_badi_service=>get_instance(  )->imps.
+        imp_class = VALUE #( imp_class_Tab[ 1 ]  OPTIONAL ).
+      CATCH zeho_cl_messages INTO g_exception.
+                RAISE EXCEPTION TYPE zeho_cl_messages
+            EXPORTING
+              textid      = zeho_cl_messages=>badi_implementation_missing.
 
-    me->instance =  zeho_badi_service=>get_instance( ).
-    imp_class_Tab = zeho_badi_service=>get_instance(  )->imps.
-    imp_class = VALUE #( imp_class_Tab[ 1 ]  OPTIONAL ).
+    ENDTRY.
+
 
     LOOP AT zeho_service_if~t_accounts REFERENCE INTO lrd_accounts.
       IF lrd_accounts->unique_number IS INITIAL.
@@ -140,7 +148,7 @@ CLASS zeho_cl_service IMPLEMENTATION.
 *        log         = log
          ).
 
-      DATA g_exception TYPE REF TO cx_root.
+*      DATA g_exception TYPE REF TO cx_root.
       TRY .
 
           zeho_service_if~send_req(
@@ -421,9 +429,15 @@ CLASS zeho_cl_service IMPLEMENTATION.
 
     zeho_service_if~xml_resx = zeho_service_if~response->get_binary(  ).
     DATA(lv_response) = zeho_service_if~response->get_text( ).
-    xml_parser( ).
+*    IF its soap service we will convert response to xml internal table
+    FIND zeho_service_if~c_soap IN lv_response.
+    IF sy-subrc  = 0.
+      xml_parser( ).
+    ENDIF.
+*    IF its soap service we will convert response to xml internal table
 
     map_xmltable_to_db( rd_acc = rd_acc ).
+
   ENDMETHOD.
 
   METHOD xml_parser.
@@ -434,70 +448,30 @@ CLASS zeho_cl_service IMPLEMENTATION.
 
     CLEAR zeho_service_if~t_xmltab.
     DATA(reader) = cl_sxml_string_reader=>create( zeho_service_if~xml_resx ).
-
-    DO.
-      DATA(node) = reader->read_next_node( ).
-      IF reader->node_type = if_sxml_node=>co_nt_final.
-        EXIT.
-      ENDIF.
-
-      IF reader->node_type = if_sxml_node=>co_nt_element_open.
-        last_open_tag = CAST if_sxml_open_element( node ).
-
-      ENDIF.
-
-      IF reader->node_type <> if_sxml_node=>co_nt_value.
-        CONTINUE.
-      ENDIF.
-
-      APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
-      <fs_xml>-cname  = reader->name.
-      <fs_xml>-cvalue = reader->value.
-
-
-    ENDDO.
-
-
     TRY.
         DO.
-          reader->next_node( ).
+          DATA(node) = reader->read_next_node( ).
           IF reader->node_type = if_sxml_node=>co_nt_final.
             EXIT.
           ENDIF.
 
+*      IF reader->node_type = if_sxml_node=>co_nt_element_open.
+*        last_open_tag = CAST if_sxml_open_element( node ).
+*      ENDIF.
 
-          DATA(node_type)    = SWITCH #( reader->node_type WHEN if_sxml_node=>co_nt_initial THEN `CO_NT_INITIAL`
-                                                            WHEN if_sxml_node=>co_nt_element_open THEN `CO_NT_ELEMENT_OPEN`
-                                                            WHEN if_sxml_node=>co_nt_element_close THEN `CO_NT_ELEMENT_CLOSE`
-                                                            WHEN if_sxml_node=>co_nt_value THEN `CO_NT_VALUE`
-                                                            WHEN if_sxml_node=>co_nt_attribute THEN `CO_NT_ATTRIBUTE`
-                                                            ELSE `Error` ).
-*          "Name of the element
-*          node_info-name = reader->name.
-*          "Character-like value (if it is textual data)
-*          node_info-value = COND #( WHEN reader->node_type = if_sxml_node=>co_nt_value THEN reader->value ).
-*          APPEND node_info TO nodes_tab.
-          .
-          IF reader->node_type = if_sxml_node=>co_nt_element_open.
-            DO.
-              reader->next_attribute( ).
-
-              IF reader->node_type <> if_sxml_node=>co_nt_attribute.
-                EXIT.
-              ENDIF.
-              APPEND VALUE #( "node_type  = `CO_NT_ATTRIBUTE`
-                              cname       = reader->name
-                              cvalue      = reader->value ) TO zeho_service_if~t_xmltab.
-            ENDDO.
+          IF reader->node_type <> if_sxml_node=>co_nt_value.
+            CONTINUE.
           ENDIF.
+
+          APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
+          <fs_xml>-cname  = reader->name.
+          <fs_xml>-cvalue = reader->value.
+
+
         ENDDO.
       CATCH cx_sxml_state_error INTO DATA(error_parse_token).
         DATA(error_text) = error_parse_token->get_text( ).
     ENDTRY.
-
-
-
-
 
   ENDMETHOD.
 
@@ -601,7 +575,7 @@ CLASS zeho_cl_service IMPLEMENTATION.
 
       DATA lt_aa TYPE TABLE OF zeho_a_aa.
       CLEAR lt_aa.
-      lt_aa = CORRESPONDING #( zeho_service_if~t_aa  MAPPING client = DEFAULT sy-mandt ).
+      lt_aa = CORRESPONDING #( zeho_service_if~t_aa  MAPPING client = DEFAULT sy-mandt  ).
 
       MODIFY zeho_a_aa FROM TABLE @lt_aa.
       COMMIT WORK AND WAIT.

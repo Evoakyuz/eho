@@ -9,6 +9,7 @@ CLASS zeho_cl_messages DEFINITION
     INTERFACES if_t100_message .
     INTERFACES if_abap_behv_message .
 
+     constants MC_ERR_PART_SPEC like textid value '100' ##NO_TEXT.
 
     CONSTANTS:
       gc_msgid TYPE symsgid VALUE 'ZEHO_MSG',
@@ -84,14 +85,26 @@ CLASS zeho_cl_messages DEFINITION
         attr2 TYPE scx_attrname VALUE 'MV_BUKRS',
         attr3 TYPE scx_attrname VALUE 'MV_IBAN',
         attr4 TYPE scx_attrname VALUE '',
-      END OF unique_mapping_not_developed.
+      END OF unique_mapping_not_developed,
+
+       BEGIN OF wrong_sel_option,
+        msgid TYPE symsgid VALUE 'ZEHO_MSG',
+        msgno TYPE symsgno VALUE '007',
+        attr1 TYPE scx_attrname VALUE 'MV_OPTION',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+       END OF wrong_sel_option,
 
 
-
-
-
-
-
+       BEGIN OF badi_implementation_missing,
+        msgid TYPE symsgid VALUE 'ZEHO_MSG',
+        msgno TYPE symsgno VALUE '008',
+        attr1 TYPE scx_attrname VALUE '',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+       END OF badi_implementation_missing.
 
 
 
@@ -111,7 +124,11 @@ CLASS zeho_cl_messages DEFINITION
         severity         TYPE if_abap_behv_message=>t_severity OPTIONAL
         uname            TYPE syuname OPTIONAL
         mv_explanation   TYPE zeho_de_explanation OPTIONAL
-        mv_iban          TYPE iban OPTIONAL.
+        mv_iban          TYPE iban OPTIONAL
+        mv_option        TYPE chAr2 OPTIONAL.
+
+
+
 
     DATA:
       mv_attr1         TYPE string,
@@ -124,7 +141,8 @@ CLASS zeho_cl_messages DEFINITION
       mv_priority      TYPE zeho_de_priority,
       mv_uname         TYPE syuname,
       mv_explanation   TYPE zeho_de_explanation,
-      mv_iban          TYPE iban.
+      mv_iban          TYPE iban,
+      mv_option        TYPE char2.
 
 
   PROTECTED SECTION.
@@ -149,6 +167,7 @@ CLASS zeho_cl_messages IMPLEMENTATION.
     me->mv_uname                 = uname.
     me->mv_explanation           = mv_explanation.
     me->mv_iban                  = mv_iban.
+    me->mv_option                = mv_option.
 
 
     if_abap_behv_message~m_severity = severity.
@@ -161,5 +180,7 @@ CLASS zeho_cl_messages IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+
 
 ENDCLASS.

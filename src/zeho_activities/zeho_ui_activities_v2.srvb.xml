@@ -4,30 +4,30 @@
   <asx:values>
    <SRVB>
     <METADATA>
-     <NAME>ZEHO_UI_ACCT_V2</NAME>
+     <NAME>ZEHO_UI_ACTIVITIES_V2</NAME>
      <TYPE>SRVB/SVB</TYPE>
-     <DESCRIPTION>Service Binding Of Activity Type Service Definition V2</DESCRIPTION>
+     <DESCRIPTION>Service Binding Of Activities Service Definition V2</DESCRIPTION>
      <LANGUAGE>EN</LANGUAGE>
      <MASTER_LANGUAGE>EN</MASTER_LANGUAGE>
      <ABAP_LANGU_VERSION>5</ABAP_LANGU_VERSION>
     </METADATA>
     <CONTENT>
      <BIND_TYPE_IMPL>
-      <NAME>ZEHO_UI_ACCT_V2</NAME>
+      <NAME>ZEHO_UI_ACTIVITIES_V2</NAME>
      </BIND_TYPE_IMPL>
      <BIND_TYPE>ODATA</BIND_TYPE>
      <BIND_TYPE_VERSION>V2</BIND_TYPE_VERSION>
      <SERVICES>
       <item>
-       <SERVICE_NAME>ZEHO_UI_ACCT_V2</SERVICE_NAME>
+       <SERVICE_NAME>ZEHO_UI_ACTIVITIES_V2</SERVICE_NAME>
        <SERVICE_CONTENT>
         <item>
          <SERVICE_VERSION>0001</SERVICE_VERSION>
          <RELEASE_STATE>NOT_RELEASED</RELEASE_STATE>
          <SRVD_REF>
-          <URI>/sap/bc/adt/ddic/srvd/sources/zeho_ui_acct</URI>
+          <URI>/sap/bc/adt/ddic/srvd/sources/zeho_ui_activities</URI>
           <TYPE>SRVD/SRV</TYPE>
-          <NAME>ZEHO_UI_ACCT</NAME>
+          <NAME>ZEHO_UI_ACTIVITIES</NAME>
          </SRVD_REF>
          <BIND_TYPE_DATA>
           <CONTENT>
