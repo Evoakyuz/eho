@@ -8,6 +8,7 @@ INTERFACE zeho_service_if
   DATA : t_aa       TYPE zeho_tt_aa.
   DATA : t_actt    TYPE zeho_tt_actt.
   DATA : t_exp     TYPE zeho_tt_exp.
+  DATA : tt_activities TYPE zeho_tt_activities.
   data XML type STRING .
   data XML_RES type STRING .
   data XML_RESX type XSTRING .

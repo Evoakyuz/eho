@@ -1,4 +1,7 @@
 CLASS lhc_Activities DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
+    PUBLIC SECTION.
+
   PRIVATE SECTION.
 
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
@@ -26,12 +29,18 @@ CLASS lhc_Activities IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD read.
+
+
   ENDMETHOD.
 
   METHOD lock.
   ENDMETHOD.
 
   METHOD get_instance_features.
+
+    read ENTITIES OF ZEHO_I_ACTIVITIES_CUSTOM  ENTITY Activities
+    ALL FIELDS WITH CORRESPONDING #( keys  )
+    RESULT DATA(lt_result).
   ENDMETHOD.
 
 ENDCLASS.

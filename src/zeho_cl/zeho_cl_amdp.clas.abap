@@ -126,13 +126,16 @@ CLASS zeho_cl_amdp IMPLEMENTATION.
                    log.blart                     ,
                    log.lifnr                     ,
                    log.kunnr                     ,
+                   log.name1                     ,
                    log.secondgl_acc              ,
                    log.kostl                     ,
                    log.prctr                     ,
                    log.gsber                     ,
                    log.umskz                     ,
                    log.mwskz                     ,
-                   log.cancel_process
+                   log.cancel_process            ,
+                   log.customization_type      ,
+                   log.affacted_priority
                    from zeho_a_aa  as acc
                    left OUTER join zeho_a_log as log
                                 on  log.bankcode    = acc.bankcode
@@ -168,7 +171,8 @@ CLASS zeho_cl_amdp IMPLEMENTATION.
                         CompanyCode as bukrs,
                         TaxNumber1  as stcd1,
                         TaxNumber2  as stcd2,
-                        TaxNumber3  as stcd3
+                        TaxNumber3  as stcd3 ,
+                        name1
                 from ZEHO_I_CUSTOMER2;
 
 
@@ -176,7 +180,8 @@ CLASS zeho_cl_amdp IMPLEMENTATION.
                           bukrs,
                           stcd1,
                           stcd2,
-                          stcd3
+                          stcd3 ,
+                          name1
                 from ZEHO_I_SUPPLIER;
 
   ENDMETHOD.

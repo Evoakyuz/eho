@@ -17,5 +17,6 @@ define view entity ZEHO_I_CUSTOMER2 as select from I_Customer as cust
     comp.CompanyCode  as CompanyCode,
     cust.TaxNumber1   as TaxNumber1, 
     cust.TaxNumber2   as TaxNumber2,
-    cust.TaxNumber3   as TaxNumber3
+    cust.TaxNumber3   as TaxNumber3,
+    cust.CustomerName as name1
 }

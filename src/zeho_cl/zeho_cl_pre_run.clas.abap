@@ -26,7 +26,9 @@ ENDCLASS.
 
 
 
-CLASS zeho_cl_pre_run IMPLEMENTATION.
+CLASS ZEHO_CL_PRE_RUN IMPLEMENTATION.
+
+
   METHOD if_oo_adt_classrun~main.
     DATA : go_struct TYPE REF TO cl_abap_structdescr,
            gt_comp   TYPE abap_component_tab,
@@ -55,36 +57,69 @@ CLASS zeho_cl_pre_run IMPLEMENTATION.
     APPEND ls_bank TO lt_bank.
     MODIFY  zeho_a_bank FROM  TABLE @lt_bank.
 
-    DATA  : bankcode   TYPE zeho_tt_bankcode_range,
-            s_bankcode TYPE zeho_s_bankcode_range,
-            bukrs      TYPE zeho_tt_bukrs_range,
-            s_bukrs    TYPE zeho_s_bukrs_range,
-            account    TYPE zeho_tt_acc_range,
-*      !LOG type ref to ZSOA_EHO_CL_APP_LOG optional
-            begdate    TYPE datum,
-            enddate    TYPE datum.
-    begdate = '20240226'.
-    enddate = '20240226'.
-    s_bankcode-sign = 'I'.
-    s_bankcode-option = 'EQ'.
-    s_bankcode-low = 'AKBANK'.
-    APPEND s_bankcode TO bankcode.
-    s_bukrs-sign = 'I'.
-    s_bukrs-option = 'EQ'.
-    s_bukrs-low = '2200'.
-    APPEND s_bukrs TO bukrs.
-    TRY.
-        CREATE OBJECT lc_service
-          EXPORTING
-            bankcode = bankcode
-            bukrs    = bukrs
-*           account  =
-            begdate  = begdate
-            enddate  = enddate.
-      CATCH zeho_cl_messages.
-    ENDTRY.
+**    DATA  : bankcode   TYPE zeho_tt_bankcode_range,
+**            s_bankcode TYPE zeho_s_bankcode_range,
+**            bukrs      TYPE zeho_tt_bukrs_range,
+**            s_bukrs    TYPE zeho_s_bukrs_range,
+**            account    TYPE zeho_tt_acc_range,
+**            begdate    TYPE datum,
+**            enddate    TYPE datum.
+**    begdate = '20240226'.
+**    enddate = '20240226'.
+**    s_bankcode-sign = 'I'.
+**    s_bankcode-option = 'EQ'.
+**    s_bankcode-low = 'AKBANK'.
+**    APPEND s_bankcode TO bankcode.
+**    s_bukrs-sign = 'I'.
+**    s_bukrs-option = 'EQ'.
+**    s_bukrs-low = '2200'.
+**    APPEND s_bukrs TO bukrs.
+**    TRY.
+**        CREATE OBJECT lc_service
+**          EXPORTING
+**            bankcode = bankcode
+**            bukrs    = bukrs
+***           account  =
+**            begdate  = begdate
+**            enddate  = enddate.
+**      CATCH zeho_cl_messages.
+**    ENDTRY.
+delete FROM zeho_a_aa.
+
+DATA : lt_activity TYPE TABLE OF zeho_a_aa,
+       ls_activity TYPE  zeho_a_aa.
+
+    ls_activity-bankcode = 'AKBANK'.
+    ls_activity-bukrs = '1100'.
+    ls_activity-iban = 'TR123456789'.
+    ls_activity-branch = 10.
+    ls_activity-acccount_no = '789'.
+    ls_activity-act_date = '20250303'.
+    ls_activity-act_time = '090405'.
+    ls_activity-amount = 1000.
+    ls_activity-waers = 'TRY'.
+*    ls_activity-act_no = '1'
+    DATA lv_act_no TYPe i.
+    lv_act_no = 0.
+    DO 10 times.
+      lv_act_no = lv_act_no + 1.
+      ls_activity-amount = 1000 * lv_act_no.
+      ls_activity-instant_amount  = ls_activity-amount.
+      ls_activity-act_no = lv_act_no.
+      ls_activity-client = sy-mandt.
+      ls_activity-sender_iban = 'TR1234657123123'.
+      if lv_act_no MOD 2 = 0.
+      ls_activity-description = 'ABC deterjan'.
+      else.
+      ls_activity-description = 'Maydonoz döner limited A.Ş '.
+      endif.
+      APPEND ls_activity TO lt_activity.
+
+    enddo.
+    if lt_activity is not initial.
+      MODIFY zeho_a_aa FROM TABLE @lt_activity.
+    endif.
 
 
   ENDMETHOD.
-
 ENDCLASS.

@@ -151,7 +151,9 @@ ENDCLASS.
 
 
 
-CLASS zeho_cl_messages IMPLEMENTATION.
+CLASS ZEHO_CL_MESSAGES IMPLEMENTATION.
+
+
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 
     super->constructor(  previous = previous ) .
@@ -180,7 +182,4 @@ CLASS zeho_cl_messages IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
-
-
 ENDCLASS.

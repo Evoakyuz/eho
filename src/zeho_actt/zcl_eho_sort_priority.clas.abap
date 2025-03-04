@@ -12,7 +12,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_eho_sort_priority IMPLEMENTATION.
+CLASS ZCL_EHO_SORT_PRIORITY IMPLEMENTATION.
 
 
   METHOD if_sadl_exit_sort_transform~map_element.
@@ -22,5 +22,4 @@ CLASS zcl_eho_sort_priority IMPLEMENTATION.
   endif.
 
   ENDMETHOD.
-
 ENDCLASS.

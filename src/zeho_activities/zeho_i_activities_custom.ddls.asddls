@@ -6,7 +6,7 @@ define root custom entity ZEHO_I_ACTIVITIES_CUSTOM
   // with parameters parameter_name : parameter_type
 {
 
-  key client               : abap.clnt;
+//  key client               : abap.clnt;
 
   key bankcode             : bankk;
 
@@ -29,14 +29,16 @@ define root custom entity ZEHO_I_ACTIVITIES_CUSTOM
 
       shkzg                : shkzg;
 
-      @Semantics.amount.currencyCode : 'Waers'
+      @Semantics.amount.currencyCode : 'WAERS'
       amount               : zeho_de_amount;
 
-      @Semantics.amount.currencyCode : 'Waers'
-      instant_amount       : zeho_de_instant_amount;
-
-      waers                : waers;
+      @Semantics.amount.currencyCode : 'WAERS'
       
+      instant_amount       : zeho_de_instant_amount;
+//      @UI.hidden: true
+      @Semantics.currencyCode: true
+      waers              : waers; 
+
       activity_type        : zeho_de_activity_types;
 
       activity_explanation : zeho_de_activity_explanation;
@@ -62,6 +64,7 @@ define root custom entity ZEHO_I_ACTIVITIES_CUSTOM
       lifnr                : lifnr;
 
       kunnr                : kunnr;
+      name1                : name1_gp;
 
       secondgl_acc         : saknr;
 
@@ -76,5 +79,7 @@ define root custom entity ZEHO_I_ACTIVITIES_CUSTOM
       mwskz                : mwskz;
 
       cancel_process       : zeho_de_cancell_process;
+      customization_type   : zeho_de_customization_type;
+      affacted_priority    : zeho_de_priority;
 
 }

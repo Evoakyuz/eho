@@ -15,5 +15,6 @@ define view entity ZEHO_I_SUPPLIER as select from I_Supplier as sup
     comp.CompanyCode    as bukrs,
     sup.TaxNumber1      as stcd1,
     sup.TaxNumber2      as stcd2,
-    sup.TaxNumber3      as stcd3
+    sup.TaxNumber3      as stcd3 ,
+    sup.BusinessPartnerName1 as name1
 }

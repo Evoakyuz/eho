@@ -59,7 +59,8 @@ ENDCLASS.
 
 
 
-CLASS zeho_cl_service IMPLEMENTATION.
+CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
+
 
   METHOD constructor.
     DATA : lrd_accounts TYPE REF TO zeho_s_acc.
@@ -180,6 +181,19 @@ CLASS zeho_cl_service IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD get_actt.
+
+    CLEAR t_actt[].
+    SELECT * FROM ZEHO_a_actt  AS actt
+    INNER JOIN @t_aa AS data
+             ON data~bankcode = actt~bankcode
+            AND data~bukrs    = actt~bukrs
+           INTO CORRESPONDING FIELDS OF TABLE  @t_actt.
+
+  ENDMETHOD.
+
+
   METHOD get_customization.
     SELECT *
      FROM zeho_a_acc
@@ -238,242 +252,17 @@ CLASS zeho_cl_service IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD zeho_service_if~create_req.
 
-
-    FIELD-SYMBOLS <fs_val> TYPE any.
-
-    IF imp_class IS BOUND.
-      imp_class->get_request(
-      EXPORTING
-        rd_acc  = rd_acc
-      CHANGING
-        request =  zeho_service_if~xml
-    ).
-    ENDIF.
-
-    CHECK zeho_service_if~xml IS NOT INITIAL.
-
-    LOOP AT zeho_service_if~t_reqm ASSIGNING FIELD-SYMBOL(<fs_mapping>).
-      ASSIGN COMPONENT <fs_mapping>-input_value OF STRUCTURE rd_acc->* TO <fs_val>.
-      IF <fs_val> IS ASSIGNED.
-        CASE <fs_mapping>-input_tag.
-          WHEN 'BEGDATE_FORMAT'.
-            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-            REPLACE 'YYYY' IN  zeho_service_if~xml WITH begdate(4).
-            REPLACE 'MM' IN  zeho_service_if~xml WITH begdate+4(2).
-            REPLACE 'DD' IN  zeho_service_if~xml WITH begdate+6(2).
-            REPLACE 'HH' IN  zeho_service_if~xml WITH '00'.
-            REPLACE 'MM' IN  zeho_service_if~xml WITH '00'.
-            REPLACE 'SS' IN  zeho_service_if~xml WITH '00'.
-            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
-          WHEN 'ENDDATE_FORMAT'.
-            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-            REPLACE 'YYYY' IN  zeho_service_if~xml WITH enddate(4).
-            REPLACE 'MM' IN  zeho_service_if~xml WITH enddate+4(2).
-            REPLACE 'DD' IN  zeho_service_if~xml WITH enddate+6(2).
-            REPLACE 'HH' IN  zeho_service_if~xml WITH '23'.
-            REPLACE 'MM' IN  zeho_service_if~xml WITH '59'.
-            REPLACE 'SS' IN  zeho_service_if~xml WITH '59'.
-            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
-          WHEN OTHERS.
-            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
-
-        ENDCASE.
-        UNASSIGN <fs_val>.
-      ENDIF.
-
-    ENDLOOP.
-
-
-    IF imp_class IS BOUND.
-*      instance->imp->get_request(
-*        EXPORTING
-*          rd_acc  = rd_acc
-*        CHANGING
-*          request =  zeho_service_if~xml
-*      ).
-      imp_class->create_req_processing(
-        EXPORTING
-          rd_acc  = rd_acc
-          input_xml =  zeho_service_if~t_reqm
-        CHANGING
-          xml       =  zeho_service_if~xml
-      ).
-    ENDIF.
-
-
+  METHOD get_exp.
+    CLEAR t_exp[].
+    SELECT * FROM ZEHO_a_actt  AS exp
+    INNER JOIN @t_aa AS data
+             ON data~bankcode = exp~bankcode
+            AND data~bukrs    = exp~bukrs
+           INTO CORRESPONDING FIELDS OF TABLE  @t_exp.
 
   ENDMETHOD.
 
-
-
-  METHOD zeho_service_if~send_req.
-
-
-    DATA: url         TYPE string,
-          username    TYPE string,
-          password    TYPE string,
-          host        TYPE string,
-          contenttype TYPE string,
-          slenght     TYPE i,
-          lenght      TYPE string,
-          soapaction  TYPE string,
-          accept      TYPE string,
-          ls_serv     TYPE zeho_s_serv.
-
-    ls_serv = VALUE #( zeho_service_if~t_serv[ bankcode = rd_acc->bankcode
-                                               bukrs    = rd_acc->bukrs ]  OPTIONAL ).
-
-    url         = ls_serv-serv_url.
-    username    = rd_acc->username.
-    password    = rd_acc->password.
-    host        = ls_serv-host.
-    contenttype = ls_serv-content_type.
-    soapaction  = ls_serv-soap_action.
-    slenght     = strlen( zeho_service_if~xml ).
-
-    lenght = slenght.
-    TRY.
-        zeho_service_if~http_client = cl_web_http_client_manager=>create_by_http_destination( cl_http_destination_provider=>create_by_url( url ) ).
-      CATCH cx_web_http_client_error cx_http_dest_provider_error.
-        "handle exception
-    ENDTRY.
-    zeho_service_if~request = zeho_service_if~http_client->get_http_request( ).
-    zeho_service_if~request->set_header_field(
-        EXPORTING
-    i_name  = zeho_service_if~c_reqvalue
-    i_value = zeho_service_if~c_post
-    ).
-
-    zeho_service_if~request->set_header_field(
-    EXPORTING
-    i_name  = zeho_service_if~c_serverprotocol
-    i_value = zeho_service_if~c_http
-).
-
-    IF host IS NOT INITIAL.
-      zeho_service_if~request->set_header_field(
-     EXPORTING
-     i_name  = zeho_service_if~c_host
-     i_value = host
- ).
-    ENDIF.
-
-
-    IF contenttype IS NOT INITIAL.
-      zeho_service_if~request->set_content_type( content_type = contenttype ).
-    ENDIF.
-    IF soapaction IS NOT INITIAL.
-      zeho_service_if~request->set_header_field(
-        EXPORTING
-          i_name  = zeho_service_if~c_soapaction
-          i_value = soapaction
-      ).
-    ENDIF.
-
-    zeho_service_if~request->set_header_field(
-      EXPORTING
-        i_name  = zeho_service_if~c_accept
-        i_value = zeho_service_if~c_acceptval11
-    ).
-
-    zeho_service_if~request->set_text( EXPORTING i_text = zeho_service_if~xml
-                                    i_length = slenght
-                                    i_offset = 0 ).
-
-
-    IF imp_class IS BOUND.
-
-      imp_class->send_req_processing(
-        EXPORTING
-          rd_acc      = rd_acc
-          input_xml   = zeho_service_if~t_serv
-          accounts    =  zeho_service_if~t_accounts
-          begdate     = begdate
-          enddate     = enddate
-        CHANGING
-          http_client = zeho_service_if~http_client
-          request     = zeho_service_if~request
-      ).
-
-    ENDIF.
-
-
-  ENDMETHOD.
-
-
-
-  METHOD zeho_service_if~get_res.
-    DATA lv_http_code TYPE i.
-    TRY.
-        zeho_service_if~response = zeho_service_if~http_client->execute( i_method = if_web_http_client=>post ).
-      CATCH cx_web_http_client_error.
-        "handle exception
-    ENDTRY.
-
-    zeho_service_if~response->get_last_error(
-      RECEIVING
-        rc = lv_http_code
-    ).
-
-
-    IF lv_http_code BETWEEN 200 AND 299.
-      "Succesfull
-
-    ELSEIF lv_http_code GE 100.
-      "Error
-      EXIT.
-    ENDIF.
-
-
-    zeho_service_if~xml_resx = zeho_service_if~response->get_binary(  ).
-    DATA(lv_response) = zeho_service_if~response->get_text( ).
-*    IF its soap service we will convert response to xml internal table
-    FIND zeho_service_if~c_soap IN lv_response.
-    IF sy-subrc  = 0.
-      xml_parser( ).
-    ENDIF.
-*    IF its soap service we will convert response to xml internal table
-
-    map_xmltable_to_db( rd_acc = rd_acc ).
-
-  ENDMETHOD.
-
-  METHOD xml_parser.
-    DATA : attributes TYPE if_sxml_attribute=>attributes.
-    DATA l_node TYPE REF TO if_ixml_node.
-    DATA return    TYPE bapiretct.
-    DATA last_open_tag TYPE REF TO if_sxml_open_element.
-
-    CLEAR zeho_service_if~t_xmltab.
-    DATA(reader) = cl_sxml_string_reader=>create( zeho_service_if~xml_resx ).
-    TRY.
-        DO.
-          DATA(node) = reader->read_next_node( ).
-          IF reader->node_type = if_sxml_node=>co_nt_final.
-            EXIT.
-          ENDIF.
-
-*      IF reader->node_type = if_sxml_node=>co_nt_element_open.
-*        last_open_tag = CAST if_sxml_open_element( node ).
-*      ENDIF.
-
-          IF reader->node_type <> if_sxml_node=>co_nt_value.
-            CONTINUE.
-          ENDIF.
-
-          APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
-          <fs_xml>-cname  = reader->name.
-          <fs_xml>-cvalue = reader->value.
-
-
-        ENDDO.
-      CATCH cx_sxml_state_error INTO DATA(error_parse_token).
-        DATA(error_text) = error_parse_token->get_text( ).
-    ENDTRY.
-
-  ENDMETHOD.
 
   METHOD map_xmltable_to_db.
     DATA lines TYPE i.
@@ -595,26 +384,240 @@ CLASS zeho_cl_service IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_actt.
 
-    CLEAR t_actt[].
-    SELECT * FROM ZEHO_a_actt  AS actt
-    INNER JOIN @t_aa AS data
-             ON data~bankcode = actt~bankcode
-            AND data~bukrs    = actt~bukrs
-           INTO CORRESPONDING FIELDS OF TABLE  @t_actt.
+  METHOD xml_parser.
+    DATA : attributes TYPE if_sxml_attribute=>attributes.
+    DATA l_node TYPE REF TO if_ixml_node.
+    DATA return    TYPE bapiretct.
+    DATA last_open_tag TYPE REF TO if_sxml_open_element.
+
+    CLEAR zeho_service_if~t_xmltab.
+    DATA(reader) = cl_sxml_string_reader=>create( zeho_service_if~xml_resx ).
+    TRY.
+        DO.
+          DATA(node) = reader->read_next_node( ).
+          IF reader->node_type = if_sxml_node=>co_nt_final.
+            EXIT.
+          ENDIF.
+
+*      IF reader->node_type = if_sxml_node=>co_nt_element_open.
+*        last_open_tag = CAST if_sxml_open_element( node ).
+*      ENDIF.
+
+          IF reader->node_type <> if_sxml_node=>co_nt_value.
+            CONTINUE.
+          ENDIF.
+
+          APPEND INITIAL LINE TO zeho_service_if~t_xmltab ASSIGNING FIELD-SYMBOL(<fs_xml>).
+          <fs_xml>-cname  = reader->name.
+          <fs_xml>-cvalue = reader->value.
+
+
+        ENDDO.
+      CATCH cx_sxml_state_error INTO DATA(error_parse_token).
+        DATA(error_text) = error_parse_token->get_text( ).
+    ENDTRY.
 
   ENDMETHOD.
 
 
-  METHOD get_exp.
-    CLEAR t_exp[].
-    SELECT * FROM ZEHO_a_actt  AS exp
-    INNER JOIN @t_aa AS data
-             ON data~bankcode = exp~bankcode
-            AND data~bukrs    = exp~bukrs
-           INTO CORRESPONDING FIELDS OF TABLE  @t_exp.
+  METHOD zeho_service_if~create_req.
+
+
+    FIELD-SYMBOLS <fs_val> TYPE any.
+
+    IF imp_class IS BOUND.
+      imp_class->get_request(
+      EXPORTING
+        rd_acc  = rd_acc
+      CHANGING
+        request =  zeho_service_if~xml
+    ).
+    ENDIF.
+
+    CHECK zeho_service_if~xml IS NOT INITIAL.
+
+    LOOP AT zeho_service_if~t_reqm ASSIGNING FIELD-SYMBOL(<fs_mapping>).
+      ASSIGN COMPONENT <fs_mapping>-input_value OF STRUCTURE rd_acc->* TO <fs_val>.
+      IF <fs_val> IS ASSIGNED.
+        CASE <fs_mapping>-input_tag.
+          WHEN 'BEGDATE_FORMAT'.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
+            REPLACE 'YYYY' IN  zeho_service_if~xml WITH begdate(4).
+            REPLACE 'MM' IN  zeho_service_if~xml WITH begdate+4(2).
+            REPLACE 'DD' IN  zeho_service_if~xml WITH begdate+6(2).
+            REPLACE 'HH' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'MM' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'SS' IN  zeho_service_if~xml WITH '00'.
+            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
+          WHEN 'ENDDATE_FORMAT'.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
+            REPLACE 'YYYY' IN  zeho_service_if~xml WITH enddate(4).
+            REPLACE 'MM' IN  zeho_service_if~xml WITH enddate+4(2).
+            REPLACE 'DD' IN  zeho_service_if~xml WITH enddate+6(2).
+            REPLACE 'HH' IN  zeho_service_if~xml WITH '23'.
+            REPLACE 'MM' IN  zeho_service_if~xml WITH '59'.
+            REPLACE 'SS' IN  zeho_service_if~xml WITH '59'.
+            REPLACE 'TSTSTS' IN  zeho_service_if~xml WITH '000000'.
+          WHEN OTHERS.
+            REPLACE <fs_mapping>-input_tag IN zeho_service_if~xml WITH <fs_val>.
+
+        ENDCASE.
+        UNASSIGN <fs_val>.
+      ENDIF.
+
+    ENDLOOP.
+
+
+    IF imp_class IS BOUND.
+*      instance->imp->get_request(
+*        EXPORTING
+*          rd_acc  = rd_acc
+*        CHANGING
+*          request =  zeho_service_if~xml
+*      ).
+      imp_class->create_req_processing(
+        EXPORTING
+          rd_acc  = rd_acc
+          input_xml =  zeho_service_if~t_reqm
+        CHANGING
+          xml       =  zeho_service_if~xml
+      ).
+    ENDIF.
+
+
 
   ENDMETHOD.
 
+
+  METHOD zeho_service_if~get_res.
+    DATA lv_http_code TYPE i.
+    TRY.
+        zeho_service_if~response = zeho_service_if~http_client->execute( i_method = if_web_http_client=>post ).
+      CATCH cx_web_http_client_error.
+        "handle exception
+    ENDTRY.
+
+    zeho_service_if~response->get_last_error(
+      RECEIVING
+        rc = lv_http_code
+    ).
+
+
+    IF lv_http_code BETWEEN 200 AND 299.
+      "Succesfull
+
+    ELSEIF lv_http_code GE 100.
+      "Error
+      EXIT.
+    ENDIF.
+
+
+    zeho_service_if~xml_resx = zeho_service_if~response->get_binary(  ).
+    DATA(lv_response) = zeho_service_if~response->get_text( ).
+*    IF its soap service we will convert response to xml internal table
+    FIND zeho_service_if~c_soap IN lv_response.
+    IF sy-subrc  = 0.
+      xml_parser( ).
+    ENDIF.
+*    IF its soap service we will convert response to xml internal table
+
+    map_xmltable_to_db( rd_acc = rd_acc ).
+
+  ENDMETHOD.
+
+
+  METHOD zeho_service_if~send_req.
+
+
+    DATA: url         TYPE string,
+          username    TYPE string,
+          password    TYPE string,
+          host        TYPE string,
+          contenttype TYPE string,
+          slenght     TYPE i,
+          lenght      TYPE string,
+          soapaction  TYPE string,
+          accept      TYPE string,
+          ls_serv     TYPE zeho_s_serv.
+
+    ls_serv = VALUE #( zeho_service_if~t_serv[ bankcode = rd_acc->bankcode
+                                               bukrs    = rd_acc->bukrs ]  OPTIONAL ).
+
+    url         = ls_serv-serv_url.
+    username    = rd_acc->username.
+    password    = rd_acc->password.
+    host        = ls_serv-host.
+    contenttype = ls_serv-content_type.
+    soapaction  = ls_serv-soap_action.
+    slenght     = strlen( zeho_service_if~xml ).
+
+    lenght = slenght.
+    TRY.
+        zeho_service_if~http_client = cl_web_http_client_manager=>create_by_http_destination( cl_http_destination_provider=>create_by_url( url ) ).
+      CATCH cx_web_http_client_error cx_http_dest_provider_error.
+        "handle exception
+    ENDTRY.
+    zeho_service_if~request = zeho_service_if~http_client->get_http_request( ).
+    zeho_service_if~request->set_header_field(
+        EXPORTING
+    i_name  = zeho_service_if~c_reqvalue
+    i_value = zeho_service_if~c_post
+    ).
+
+    zeho_service_if~request->set_header_field(
+    EXPORTING
+    i_name  = zeho_service_if~c_serverprotocol
+    i_value = zeho_service_if~c_http
+).
+
+    IF host IS NOT INITIAL.
+      zeho_service_if~request->set_header_field(
+     EXPORTING
+     i_name  = zeho_service_if~c_host
+     i_value = host
+ ).
+    ENDIF.
+
+
+    IF contenttype IS NOT INITIAL.
+      zeho_service_if~request->set_content_type( content_type = contenttype ).
+    ENDIF.
+    IF soapaction IS NOT INITIAL.
+      zeho_service_if~request->set_header_field(
+        EXPORTING
+          i_name  = zeho_service_if~c_soapaction
+          i_value = soapaction
+      ).
+    ENDIF.
+
+    zeho_service_if~request->set_header_field(
+      EXPORTING
+        i_name  = zeho_service_if~c_accept
+        i_value = zeho_service_if~c_acceptval11
+    ).
+
+    zeho_service_if~request->set_text( EXPORTING i_text = zeho_service_if~xml
+                                    i_length = slenght
+                                    i_offset = 0 ).
+
+
+    IF imp_class IS BOUND.
+
+      imp_class->send_req_processing(
+        EXPORTING
+          rd_acc      = rd_acc
+          input_xml   = zeho_service_if~t_serv
+          accounts    =  zeho_service_if~t_accounts
+          begdate     = begdate
+          enddate     = enddate
+        CHANGING
+          http_client = zeho_service_if~http_client
+          request     = zeho_service_if~request
+      ).
+
+    ENDIF.
+
+
+  ENDMETHOD.
 ENDCLASS.
