@@ -98,7 +98,7 @@ CLASS zeho_cl_amdp IMPLEMENTATION.
                               zeho_a_acc.
 
 
-    et_aa = select acc.client                    ,
+    et_aa = select
                    acc.bankcode                  ,
                    acc.bukrs                     ,
                    acc.iban                      ,

@@ -267,6 +267,7 @@ CLASS zeho_cl_rap_activities_query IMPLEMENTATION.
 
       IF tt_activities IS NOT INITIAL.
 
+
         response_tab = CORRESPONDING #( tt_activities[] ).
 *        io_response->set_total_number_of_records( iv_total_number_of_records = lines( tt_activities )  ).
         io_response->set_data( it_data = response_tab ).

@@ -35,6 +35,11 @@ authorization master ( instance )
   customer_ref;
 
 
+  action ( features : instance ) saveActivity  result [1] $self;
+  action ( features : instance ) multipleSave result [1] $self;
+  action ( features : instance ) reverseActivity result [1] $self;
+
+
 
 
 

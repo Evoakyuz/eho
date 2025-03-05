@@ -205,6 +205,19 @@ annotate entity ZEHO_I_ACTIVITIES_CUSTOM with
     @UI.lineItem         : [{  hidden: true }]
   @Consumption.filter.hidden: true
     @UI.identification: [{  hidden: true }]
+   @UI: {
+  lineItem:       [ { position: 340, importance: #HIGH }                          
+                    ,{ type: #FOR_ACTION, dataAction: 'saveActivity', label: 'Post' } 
+                    ,{ type: #FOR_ACTION, dataAction: 'multipleSave', label: 'Multiple Post' }
+                    ,{ type: #FOR_ACTION, dataAction: 'reverseActivity', label: 'Reverse Document' }
+       ],
+  identification: [ { position: 340 }                          
+                   ,{ type: #FOR_ACTION, dataAction: 'saveActivity', label: 'Deduct Discount'  } 
+                    ,{ type: #FOR_ACTION, dataAction: 'multipleSave', label: 'Multiple Post' }
+                    ,{ type: #FOR_ACTION, dataAction: 'reverseActivity', label: 'Reverse Document' }
+       ],
+   textArrangement: #TEXT_ONLY
+  }
   affacted_priority;
   
   

@@ -54,6 +54,8 @@ define root custom entity ZEHO_I_ACTIVITIES_CUSTOM
       sender_bank          : zeho_de_sender_bank;
 
       customer_ref         : zeho_de_customer_ref;
+      
+       hkont                 : hkont;
 
       belnr                : belnr_d;
 
