@@ -35,6 +35,8 @@ CLASS zeho_cl_service DEFINITION
         !t_respm  TYPE zeho_tt_respm
         !t_serv   TYPE zeho_tt_serv
         !t_acc    TYPE zeho_tt_acc
+        !t_cust   TYPE zeho_tt_customer
+        !t_suppl  TYPE zeho_tt_supplier
       RAISING
         zeho_cl_messages.
     METHODS   xml_parser .
@@ -55,11 +57,22 @@ CLASS zeho_cl_service DEFINITION
       CHANGING
         !t_exp TYPE zeho_tt_exp.
 
+    METHODS fill_posting_rules_2_db
+      IMPORTING
+        t_actt TYPE  zeho_tt_actt
+        t_exp  TYPE  zeho_tt_exp
+        t_cust TYPE zeho_tt_customer
+        t_supl TYPE zeho_tt_supplier
+        t_acc  TYPE zeho_tt_acc
+      CHANGING
+        t_aa   TYPE zeho_tt_aa.
+
+
 ENDCLASS.
 
 
 
-CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
+CLASS zeho_cl_service IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -78,18 +91,20 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
         t_respm  = zeho_service_if~t_respm
         t_serv   = zeho_service_if~t_serv
         t_acc    = zeho_service_if~t_accounts
+        t_cust   = zeho_service_if~t_cust
+        t_suppl  = zeho_service_if~t_suppl
     ).
 
 *    GET BADI me->instance.
-     DATA g_exception TYPE REF TO cx_root.
+    DATA g_exception TYPE REF TO cx_root.
     TRY.
         me->instance =  zeho_badi_service=>get_instance( ).
         imp_class_Tab = zeho_badi_service=>get_instance(  )->imps.
         imp_class = VALUE #( imp_class_Tab[ 1 ]  OPTIONAL ).
       CATCH zeho_cl_messages INTO g_exception.
-                RAISE EXCEPTION TYPE zeho_cl_messages
-            EXPORTING
-              textid      = zeho_cl_messages=>badi_implementation_missing.
+        RAISE EXCEPTION TYPE zeho_cl_messages
+          EXPORTING
+            textid = zeho_cl_messages=>badi_implementation_missing.
 
     ENDTRY.
 
@@ -195,6 +210,8 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
 
 
   METHOD get_customization.
+    DATA lv_where TYPE string.
+    DATA : tt_bukrs_range TYPE zeho_tt_bukrs_range.
     SELECT *
      FROM zeho_a_acc
     WHERE bankcode IN @bankcode
@@ -248,6 +265,26 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
             textid = zeho_cl_messages=>response_mapping_not_found.
       ENDIF.
 
+      tt_bukrs_range = VALUE #( FOR comp IN t_acc
+                                ( sign = 'I' option = 'EQ' low = comp-bukrs high = comp-bukrs )
+                                  ).
+
+      lv_where = zeho_cl_seltab=>combine_seltabs(
+                         it_named_seltabs = VALUE #(
+                       (    name = 'BUKRS'    dref = REF #(  tt_bukrs_range    ) )
+                        )
+                       ).
+
+      zeho_cl_amdp=>get_partners(
+             EXPORTING
+               i_where     = lv_where
+             IMPORTING
+               et_customer = zeho_service_if~t_cust
+               et_supplier = zeho_service_if~t_suppl
+           ).
+
+
+
 *       Implement Exception here
     ENDIF.
   ENDMETHOD.
@@ -255,7 +292,7 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
 
   METHOD get_exp.
     CLEAR t_exp[].
-    SELECT * FROM ZEHO_a_actt  AS exp
+    SELECT * FROM ZEHO_a_exp  AS exp
     INNER JOIN @t_aa AS data
              ON data~bankcode = exp~bankcode
             AND data~bukrs    = exp~bukrs
@@ -353,10 +390,25 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
         CHANGING
           t_exp = zeho_service_if~t_exp ).
 
+
+        me->fill_posting_rules_2_db(
+        EXPORTING
+        t_actt = zeho_service_if~t_actt[]
+        t_exp  = zeho_service_if~t_exp[]
+        t_cust = zeho_service_if~t_cust[]
+        t_supl = zeho_service_if~t_suppl[]
+        t_acc  = zeho_service_if~t_accounts[]
+      CHANGING
+        t_aa  = zeho_service_if~t_aa ).
+
+
+
         imp_class->final_processing(
        EXPORTING
          t_actt = zeho_service_if~t_actt[]
          t_exp  = zeho_service_if~t_exp[]
+         t_cust = zeho_service_if~t_cust[]
+         t_supl = zeho_service_if~t_suppl[]
        CHANGING
          t_aa  = zeho_service_if~t_aa ).
 
@@ -620,4 +672,33 @@ CLASS ZEHO_CL_SERVICE IMPLEMENTATION.
 
 
   ENDMETHOD.
+  METHOD fill_posting_rules_2_db.
+    DATA tt_activities TYPE zeho_tt_activities.
+    DATA rd_activity TYPE REF TO zeho_s_activity.
+    DATA lt_cust TYPE TABLE OF zeho_a_actcust.
+    CLEAR lt_cust.
+    tt_activities = CORRESPONDING #( t_aa ).
+
+    LOOP AT tt_activities REFERENCE INTO rd_activity WHERE belnr = ' '
+                                                   AND cancel_process = ' '.
+
+      zeho_cl_document_processing=>fill_list(
+        EXPORTING
+          tt_exp   = t_exp
+          tt_acct  = t_actt
+          tt_cust  = t_cust
+          tt_suppl = t_supl
+          tt_account   = t_acc
+        CHANGING
+          rd_aa    = rd_activity
+      ).
+
+    ENDLOOP.
+
+    lt_cust = CORRESPONDING #( tt_activities MAPPING client = DEFAULT sy-mandt ).
+
+    MODIFY zeho_a_actcust FROM TABLE @lt_cust.
+
+  ENDMETHOD.
+
 ENDCLASS.

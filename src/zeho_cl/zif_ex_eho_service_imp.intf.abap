@@ -48,6 +48,8 @@ INTERFACE zif_ex_eho_service_imp
       IMPORTING
       t_actt TYPe  zeho_tt_actt
       T_EXP TYPE  zeho_tt_exp
+      t_cust TYPE zeho_tt_customer
+      t_supl TYPE zeho_tt_supplier
       changing
       T_AA  TYPE zeho_tt_aa.
 

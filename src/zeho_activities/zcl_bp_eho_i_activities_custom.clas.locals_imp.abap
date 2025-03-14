@@ -137,9 +137,9 @@ CLASS lhc_Activities IMPLEMENTATION.
 
   METHOD read.
 
-    IF lo_buffer IS NOT BOUND.
-      lo_buffer = lcl_buffer=>get_instance( ).
-    ENDIF.
+
+    DATA(lo_buffer) = lcl_buffer=>get_instance( ).
+
     lo_buffer->get_data(
       EXPORTING
         it_activity        = keys
@@ -160,7 +160,6 @@ CLASS lhc_Activities IMPLEMENTATION.
       CORRESPONDING #( keys )
    RESULT DATA(activities)
    FAILED failed.
-
 
     result = VALUE #( FOR activity IN activities
                    ( bankcode                   = activity-bankcode

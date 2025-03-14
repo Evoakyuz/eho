@@ -100,7 +100,7 @@ CLASS lsc_ZEHO_I_EXP IMPLEMENTATION.
         lr_exp->Bankcode = lr_exp->%tmp-Bankcode.
         lr_exp->Bukrs = lr_exp->%tmp-Bukrs.
         lr_exp->ActivityType = lr_exp->%tmp-ActivityType.
-        lr_exp->Explanation = lr_exp->%tmp-ActivityType.
+        lr_exp->Explanation = lr_exp->%tmp-Explanation.
         lr_exp->dc = lr_exp->%tmp-Dc.
       ENDLOOP.
     ENDIF.

@@ -49,6 +49,9 @@ CLASS ZEHO_CL_PRE_RUN IMPLEMENTATION.
     DELETE FROM  zeho_a_tab_fld WHERE tabname = @c_acc.
     INSERT  zeho_a_tab_fld  FROM TABLE @lt_fields .
 
+    SELECT count( * )
+    FROM zeho_a_bank.
+    if sy-dbcnt = 0.
 
     DATA ls_bank TYPE zeho_a_bank.
     DATA lt_bank TYPE TABLE OF zeho_a_bank.
@@ -57,6 +60,7 @@ CLASS ZEHO_CL_PRE_RUN IMPLEMENTATION.
     APPEND ls_bank TO lt_bank.
     MODIFY  zeho_a_bank FROM  TABLE @lt_bank.
 
+       endif.
 **    DATA  : bankcode   TYPE zeho_tt_bankcode_range,
 **            s_bankcode TYPE zeho_s_bankcode_range,
 **            bukrs      TYPE zeho_tt_bukrs_range,
@@ -84,13 +88,13 @@ CLASS ZEHO_CL_PRE_RUN IMPLEMENTATION.
 **            enddate  = enddate.
 **      CATCH zeho_cl_messages.
 **    ENDTRY.
-delete FROM zeho_a_aa.
+*delete FROM zeho_a_aa.
 
 DATA : lt_activity TYPE TABLE OF zeho_a_aa,
        ls_activity TYPE  zeho_a_aa.
 
     ls_activity-bankcode = 'AKBANK'.
-    ls_activity-bukrs = '1100'.
+    ls_activity-bukrs = '3710'.
     ls_activity-iban = 'TR123456789'.
     ls_activity-branch = 10.
     ls_activity-acccount_no = '789'.
@@ -98,12 +102,13 @@ DATA : lt_activity TYPE TABLE OF zeho_a_aa,
     ls_activity-act_time = '090405'.
     ls_activity-amount = 1000.
     ls_activity-waers = 'TRY'.
+    ls_activity-activity_type = 'EFT'.
 *    ls_activity-act_no = '1'
     DATA lv_act_no TYPe i.
-    lv_act_no = 0.
+    lv_act_no = 340.
     DO 10 times.
       lv_act_no = lv_act_no + 1.
-      ls_activity-amount = 1000 * lv_act_no.
+      ls_activity-amount = 10 * lv_act_no.
       ls_activity-instant_amount  = ls_activity-amount.
       ls_activity-act_no = lv_act_no.
       ls_activity-client = sy-mandt.
@@ -111,7 +116,8 @@ DATA : lt_activity TYPE TABLE OF zeho_a_aa,
       if lv_act_no MOD 2 = 0.
       ls_activity-description = 'ABC deterjan'.
       else.
-      ls_activity-description = 'Maydonoz döner limited A.Ş '.
+       ls_activity-description = 'ABC deterjan'.
+*      ls_activity-description = 'Maydonoz döner limited A.Ş '.
       endif.
       APPEND ls_activity TO lt_activity.
 

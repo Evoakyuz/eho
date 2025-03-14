@@ -9,7 +9,7 @@ CLASS zeho_cl_messages DEFINITION
     INTERFACES if_t100_message .
     INTERFACES if_abap_behv_message .
 
-     constants MC_ERR_PART_SPEC like textid value '100' ##NO_TEXT.
+    CONSTANTS mc_err_part_spec LIKE textid VALUE '100' ##NO_TEXT.
 
     CONSTANTS:
       gc_msgid TYPE symsgid VALUE 'ZEHO_MSG',
@@ -87,24 +87,44 @@ CLASS zeho_cl_messages DEFINITION
         attr4 TYPE scx_attrname VALUE '',
       END OF unique_mapping_not_developed,
 
-       BEGIN OF wrong_sel_option,
+      BEGIN OF wrong_sel_option,
         msgid TYPE symsgid VALUE 'ZEHO_MSG',
         msgno TYPE symsgno VALUE '007',
         attr1 TYPE scx_attrname VALUE 'MV_OPTION',
         attr2 TYPE scx_attrname VALUE '',
         attr3 TYPE scx_attrname VALUE '',
         attr4 TYPE scx_attrname VALUE '',
-       END OF wrong_sel_option,
+      END OF wrong_sel_option,
 
 
-       BEGIN OF badi_implementation_missing,
+      BEGIN OF badi_implementation_missing,
         msgid TYPE symsgid VALUE 'ZEHO_MSG',
         msgno TYPE symsgno VALUE '008',
         attr1 TYPE scx_attrname VALUE '',
         attr2 TYPE scx_attrname VALUE '',
         attr3 TYPE scx_attrname VALUE '',
         attr4 TYPE scx_attrname VALUE '',
-       END OF badi_implementation_missing.
+      END OF badi_implementation_missing,
+
+
+      BEGIN OF recording_started,
+        msgid TYPE symsgid VALUE 'ZEHO_MSG',
+        msgno TYPE symsgno VALUE '009',
+        attr1 TYPE scx_attrname VALUE '',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+      END OF recording_started,
+
+      BEGIN OF document_created,
+        msgid   TYPE symsgid VALUE 'ZEHO_MSG',
+        msgno   TYPE symsgno VALUE '010',
+*        msgtype TYPE symsgty VALUE 'S',
+        attr1   TYPE scx_attrname VALUE 'MV_BELNR',
+        attr2   TYPE scx_attrname VALUE 'MV_GJAHR',
+        attr3   TYPE scx_attrname VALUE 'MV_BUKRS',
+        attr4   TYPE scx_attrname VALUE '',
+      END OF document_created.
 
 
 
@@ -125,7 +145,9 @@ CLASS zeho_cl_messages DEFINITION
         uname            TYPE syuname OPTIONAL
         mv_explanation   TYPE zeho_de_explanation OPTIONAL
         mv_iban          TYPE iban OPTIONAL
-        mv_option        TYPE chAr2 OPTIONAL.
+        mv_option        TYPE chAr2 OPTIONAL
+        mv_belnr         TYPE belnr_d OPTIONAL
+        mv_gjahr         TYPE gjahr OPTIONAL.
 
 
 
@@ -142,16 +164,17 @@ CLASS zeho_cl_messages DEFINITION
       mv_uname         TYPE syuname,
       mv_explanation   TYPE zeho_de_explanation,
       mv_iban          TYPE iban,
-      mv_option        TYPE char2.
-
-
+      mv_option        TYPE char2,
+      mv_belnr         TYPE belnr_d,
+      mv_gjahr         TYPE gjahr.
+*      mv_bukrs         TYPE bukrs.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZEHO_CL_MESSAGES IMPLEMENTATION.
+CLASS zeho_cl_messages IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -170,7 +193,8 @@ CLASS ZEHO_CL_MESSAGES IMPLEMENTATION.
     me->mv_explanation           = mv_explanation.
     me->mv_iban                  = mv_iban.
     me->mv_option                = mv_option.
-
+    me->mv_belnr                 = mv_belnr.
+    me->mv_gjahr                 = mv_gjahr.
 
     if_abap_behv_message~m_severity = severity.
 

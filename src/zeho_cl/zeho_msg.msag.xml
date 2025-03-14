@@ -56,6 +56,18 @@
      <MSGNR>008</MSGNR>
      <TEXT>Badi implementation is missing</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZEHO_MSG</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>Posting started</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZEHO_MSG</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>Document: &amp;1 created in year &amp;2 for company &amp;3</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

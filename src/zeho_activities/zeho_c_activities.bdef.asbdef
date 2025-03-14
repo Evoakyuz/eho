@@ -1,0 +1,15 @@
+projection;
+//strict ( 2 );
+
+define behavior for ZEHO_C_ACTIVITIES alias Activities
+{
+    use update;
+    use action multipleSave;
+    use action reverseActivity;
+    use action saveActivity;
+    use action saveActivitySelf;
+    use action reverseActivitySelf;
+//    use action saveActivity2;
+    use action checkMaintenance;
+    use action checkMaintenanceSelf;
+}

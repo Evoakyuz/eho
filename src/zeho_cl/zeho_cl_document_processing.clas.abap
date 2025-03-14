@@ -7,7 +7,18 @@ CLASS zeho_cl_document_processing DEFINITION
     CONSTANTS : c_stcd TYPE char4 VALUE 'STCD'.
     CONSTANTS : c_actt TYPE char4 VALUE 'ACTT'.
     CONSTANTS : c_exp  TYPE char4 VALUE 'EXPL'.
-
+    CONSTANTS : c_all  TYPE zeho_s_exp-dc VALUE 'A'.
+    CONSTANTS : c_BusinessTransactionType  TYPE glvor VALUE 'RFBU'.
+    CONSTANTS : c_try  TYPE waers VALUE 'TRY'.
+    TYPES:
+      mty_je_post_hierarchy TYPE STRUCTURE FOR ACTION IMPORT i_journalentrytp~post .
+    TYPES: lt_entyry     TYPE TABLE FOR ACTION IMPORT i_journalentrytp~post,
+           ls_entry      TYPE LINE OF lt_entyry,
+           lty_glitem    TYPE  ls_entry-%param-_glitems,
+           lty_currencya TYPE LINE OF  ls_entry-%param-_glitems,
+           lty_currency  TYPE  lty_currencya-_currencyamount,
+           lty_ARItems   TYPE  ls_entry-%param-_aritems,
+           lty_APItems   TYPE  ls_entry-%param-_apitems.
 
     CLASS-DATA: cl_doc       TYPE REF TO zeho_cl_document_processing,
                 e_subrc      TYPE sy-subrc,
@@ -22,7 +33,30 @@ CLASS zeho_cl_document_processing DEFINITION
 
                               CHANGING  rd_aa      TYPE REF TO zeho_s_activity.
 
+    METHODS : fill_header IMPORTING rd_aa TYPE zeho_i_activities
+                          CHANGING  e_je  TYPE  mty_je_post_hierarchy.
+    METHODS : fill_gl_account IMPORTING rd_aa      TYPE zeho_i_activities
+                                        e_hkont    TYPE hkont
+                                        e_dc       TYPE zeho_de_dc
+*                                             e_amount TYPE zeho_de_amount
+*                                             e_shkzg TYPe zeho_de_dc
+                              CHANGING  tt_glitems TYPE   lty_glitem.
+    METHODS : fill_secondgl_account IMPORTING rd_aa      TYPE zeho_i_activities
+                                              e_hkont    TYPE hkont
+                                               e_dc       TYPE zeho_de_dc
+*                                             e_amount TYPE zeho_de_amount
+*                                             e_shkzg TYPe zeho_de_dc
+                                    CHANGING  tt_glitems TYPE   lty_glitem.
 
+
+
+    METHODS : fill_customer  IMPORTING rd_aa      TYPE zeho_i_activities
+                                       e_dc       TYPE zeho_de_dc
+                             CHANGING  tt_aritems TYPE lty_ARItems.
+
+    METHODS : fill_supplier  IMPORTING rd_aa      TYPE zeho_i_activities
+                                        e_dc      TYPE zeho_de_dc
+                             CHANGING  tt_apitems TYPE lty_APItems.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -34,6 +68,13 @@ CLASS zeho_cl_document_processing DEFINITION
                                             tt_suppl TYPE zeho_tt_supplier
                                   CHANGING  rd_aa    TYPE REF TO zeho_s_activity
                                             e_subrc  TYPE sy-subrc.
+    METHODS : fill_currency_amount IMPORTING rd_aa        TYPE zeho_i_activities
+                                             i_dc         TYPE  zeho_de_dc
+                                   CHANGING
+*                                    tt_glitems TYPE   lty_glitem
+                                             tt_currencya TYPE lty_currency.
+    CLASS-DATA : m_buzei TYPE buzei.
+*    CLASS-DATA : cl_Ref TYPE REF TO zeho_cl_document_processing.
 
 ENDCLASS.
 
@@ -73,7 +114,7 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
     DATA lv_check TYPE char1.
 
     LOOP AT tt_exp REFERENCE INTO lrd_exp.
-      IF rd_aa->description CP lrd_exp->explanation AND lrd_exp->dc IS INITIAL.
+      IF rd_aa->description CP lrd_exp->explanation AND lrd_exp->dc = me->c_all.
         lv_check = abap_true.
       ELSEIF rd_aa->description CP lrd_exp->explanation AND rd_aa->shkzg EQ lrd_exp->dc .
         lv_check = abap_true.
@@ -95,9 +136,9 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
-    if lv_check = abap_false.
-     e_subrc = 1.
-    endif.
+    IF lv_check = abap_false.
+      e_subrc = 1.
+    ENDIF.
 
 
   ENDMETHOD.
@@ -135,7 +176,8 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
         DO 3 TIMES.
           field_name = c_stcd && stcd_counter.
 
-          READ TABLE tt_suppl REFERENCE INTO lrd_suppl WITH KEY (field_name) = rd_aa->sender_vkn.
+          READ TABLE tt_suppl REFERENCE INTO lrd_suppl WITH KEY (field_name) = rd_aa->sender_vkn
+                                                                bukrs        = rd_aa->bukrs.
           IF sy-subrc = 0 AND rd_aa->sender_vkn IS NOT INITIAL.
             rd_aa->lifnr = lrd_suppl->lifnr.
             rd_aa->name1 = lrd_suppl->name1.
@@ -146,7 +188,8 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
             EXIT.
           ENDIF.
 
-          READ TABLE tt_suppl REFERENCE INTO lrd_suppl WITH KEY (field_name) = rd_aa->debited_vkn.
+          READ TABLE tt_suppl REFERENCE INTO lrd_suppl WITH KEY (field_name) = rd_aa->debited_vkn
+                                                                bukrs        = rd_aa->bukrs.
           IF sy-subrc = 0 AND rd_aa->debited_vkn IS NOT INITIAL.
             rd_aa->lifnr = lrd_suppl->lifnr.
             rd_aa->name1 = lrd_suppl->name1.
@@ -159,7 +202,8 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
         ENDDO.
 
       ELSEIF lrd_acttype->customer_control = abap_true.
-        READ TABLE tt_cust REFERENCE INTO lrd_cust WITH KEY (field_name) = rd_aa->sender_vkn.
+        READ TABLE tt_cust REFERENCE INTO lrd_cust WITH KEY (field_name) = rd_aa->sender_vkn
+                                                            bukrs        = rd_aa->bukrs.
         IF sy-subrc = 0 AND rd_aa->sender_vkn IS NOT INITIAL.
           rd_aa->kunnr = lrd_cust->kunnr.
           rd_aa->name1 = lrd_cust->name1.
@@ -170,7 +214,8 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
           EXIT.
         ENDIF.
 
-        READ TABLE tt_cust REFERENCE INTO lrd_cust WITH KEY (field_name) = rd_aa->debited_vkn.
+        READ TABLE tt_cust REFERENCE INTO lrd_cust WITH KEY (field_name) = rd_aa->debited_vkn
+                                                            bukrs        = rd_aa->bukrs.
         IF sy-subrc = 0 AND rd_aa->debited_vkn IS NOT INITIAL.
           rd_aa->kunnr = lrd_cust->kunnr.
           rd_aa->name1 = lrd_cust->name1.
@@ -181,7 +226,8 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
           EXIT.
         ENDIF.
       ELSEIF lrd_acttype->virement_control = abap_true.
-        READ TABLE me->tt_accounts REFERENCE INTO lrd_accounts WITH KEY iban = rd_aa->sender_iban.
+        READ TABLE me->tt_accounts REFERENCE INTO lrd_accounts WITH KEY iban = rd_aa->sender_iban
+                                                                        bukrs  = rd_aa->bukrs.
         IF sy-subrc IS INITIAL AND
            rd_aa->sender_iban IS NOT INITIAL
            AND rd_aa->iban NE rd_aa->sender_iban.           "20211021.
@@ -215,6 +261,227 @@ CLASS zeho_cl_document_processing IMPLEMENTATION.
     ENDDO.
 
 
+
+
+  ENDMETHOD.
+
+  METHOD fill_header.
+    CLEAR m_buzei.
+    e_je-%param = VALUE #(
+     companycode = rd_aa-bukrs
+*    documentreferenceid = 'BKPFF'
+     createdbyuser = sy-uname
+     businesstransactiontype = c_BusinessTransactionType
+     accountingdocumenttype = rd_aa-blart
+     documentdate = rd_aa-act_date
+     postingdate = rd_aa-act_date
+     accountingdocumentheadertext = rd_aa-description
+     ).
+  ENDMETHOD.
+
+
+  METHOD fill_gl_account.
+    DATA ls_glitems TYPE LINE OF   lty_glitem.
+    DATA lt_currencyamount TYPE lty_currency.
+
+
+
+    m_buzei = m_buzei + 1.
+    CLEAR ls_glitems.
+    CLEAR lt_currencyamount.
+    ls_glitems-glaccountlineitem       = m_buzei            .
+    ls_glitems-glaccount               = e_hkont            .
+    ls_glitems-DocumentItemText        = rd_aa-description  .
+    ls_glitems-BusinessPlace           = rd_aa-gsber        .
+    ls_glitems-ValueDate               = rd_aa-act_date     .
+
+
+    fill_currency_amount(
+       EXPORTING
+         rd_aa        = rd_aa
+         i_dc         = rd_aa-shkzg
+
+
+
+       CHANGING
+*        tt_glitems   = lt_glitems
+         tt_currencya = lt_currencyamount
+     ).
+
+    tt_glitems = VALUE #(  BASE tt_glitems
+    (
+         glaccountlineitem = ls_glitems-glaccountlineitem
+         glaccount         = ls_glitems-glaccount
+         DocumentItemText  = ls_glitems-DocumentItemText
+         BusinessPlace     = ls_glitems-BusinessPlace
+         ValueDate         = ls_glitems-ValueDate
+        _currencyamount = CORRESPONDING #( lt_currencyamount )
+     )
+    ).
+
+
+
+  ENDMETHOD.
+
+  METHOD fill_secondgl_account.
+    DATA ls_glitems TYPE LINE OF   lty_glitem.
+    DATA lt_currencyamount TYPE lty_currency.
+
+
+
+    m_buzei = m_buzei + 1.
+    CLEAR ls_glitems.
+    CLEAR lt_currencyamount.
+    ls_glitems-glaccountlineitem       = m_buzei            .
+    ls_glitems-glaccount               = e_hkont            .
+    ls_glitems-DocumentItemText        = rd_aa-description  .
+    ls_glitems-BusinessPlace           = rd_aa-gsber        .
+    ls_glitems-ValueDate               = rd_aa-act_date     .
+
+
+    fill_currency_amount(
+       EXPORTING
+         rd_aa        = rd_aa
+         i_dc         = e_dc "COND #( WHEN  rd_aa-shkzg = 'H'
+                     "  THEN 'S' ELSE 'H'  )
+
+       CHANGING
+*        tt_glitems   = lt_glitems
+         tt_currencya = lt_currencyamount
+     ).
+
+    tt_glitems = VALUE #(  BASE tt_glitems
+    (
+         glaccountlineitem = ls_glitems-glaccountlineitem
+         glaccount         = ls_glitems-glaccount
+         DocumentItemText  = ls_glitems-DocumentItemText
+         BusinessPlace     = ls_glitems-BusinessPlace
+         ValueDate         = ls_glitems-ValueDate
+        _currencyamount = CORRESPONDING #( lt_currencyamount )
+     )
+    ).
+
+
+
+  ENDMETHOD.
+
+
+  METHOD fill_currency_amount.
+    DATA lv_currtype TYPE char2.
+    DATA lv_amount TYPE zeho_de_amount.
+    DATA lv_local_curr_amount TYPE zeho_de_amount.
+    IF i_dc EQ 'H'."
+      lv_amount = rd_aa-amount.
+    ELSE.
+      lv_amount = -1 * rd_aa-amount.
+    ENDIF.
+
+    IF i_dc EQ 'H'."
+      lv_local_curr_amount =  rd_aa-local_amount .
+    ELSE.
+      lv_local_curr_amount = rd_aa-local_amount * -1.
+    ENDIF.
+
+
+
+    tt_currencya = VALUE #(
+       (
+          journalentryitemamount = lv_amount
+          Currency               = rd_aa-waers
+          currencyrole     = '00'
+
+       )
+     ).
+
+    IF rd_aa-waers <> c_try.
+      tt_currencya = VALUE #( BASE  tt_currencya
+     (
+        journalentryitemamount = lv_local_curr_amount
+        Currency         = c_try
+        currencyrole     = '10'
+        ExchangeRate     = rd_aa-local_amount / rd_aa-amount
+
+     )
+   ).
+
+    ENDIF.
+
+
+  ENDMETHOD.
+
+
+  METHOD fill_customer.
+    DATA ls_aritem TYPE LINE OF   lty_aritems.
+    DATA lt_currencyamount TYPE lty_currency.
+
+    m_buzei = m_buzei + 1.
+
+    ls_aritem-GLAccountLineItem = m_buzei.
+    ls_aritem-DocumentItemText  = rd_aa-description.
+    ls_aritem-Customer          = rd_aa-kunnr .
+    ls_aritem-BusinessPlace     = rd_aa-gsber .
+    ls_aritem-SpecialGLCode     = rd_aa-umskz .
+
+    fill_currency_amount(
+   EXPORTING
+     rd_aa        = rd_aa
+      i_Dc         =  e_dc "COND #( WHEN  rd_aa-shkzg = 'H'
+                   "   THEN 'S' ELSE 'H'  )
+   CHANGING
+*        tt_glitems   = lt_glitems
+     tt_currencya = lt_currencyamount
+ ).
+
+    tt_aritems = VALUE #( BASE tt_aritems
+     (
+      GLAccountLineItem = ls_aritem-GLAccountLineItem
+      DocumentItemText  = ls_aritem-DocumentItemText
+      Customer          = ls_aritem-Customer
+      BusinessPlace     = ls_aritem-BusinessPlace
+      SpecialGLCode     = ls_aritem-SpecialGLCode
+      _currencyamount   = CORRESPONDING #( lt_currencyamount )
+
+     )
+     ).
+
+  ENDMETHOD.
+
+
+  METHOD fill_supplier.
+    DATA ls_apitem TYPE LINE OF   lty_apitems.
+    DATA lt_currencyamount TYPE lty_currency.
+
+    m_buzei = m_buzei + 1.
+    ls_apitem-GLAccountLineItem = m_buzei.
+    ls_apitem-DocumentItemText  = rd_aa-description.
+    ls_apitem-Supplier          = rd_aa-lifnr .
+    ls_apitem-BusinessPlace     = rd_aa-gsber .
+    ls_apitem-SpecialGLCode     = rd_aa-umskz .
+    ls_apitem-ProfitCenter      = rd_aa-prctr .
+
+    fill_currency_amount(
+        EXPORTING
+         rd_aa        = rd_aa
+          i_Dc         =  e_dc"COND #( WHEN  rd_aa-shkzg = 'H'
+                          "THEN 'S' ELSE 'H'  )
+        CHANGING
+         tt_currencya = lt_currencyamount
+        ).
+
+
+    tt_apitems = VALUE #( BASE tt_apitems
+ (
+  GLAccountLineItem =  ls_apitem-GLAccountLineItem
+  DocumentItemText  =  ls_apitem-DocumentItemText
+  Supplier          =  ls_apitem-Supplier
+  BusinessPlace     =  ls_apitem-BusinessPlace
+  SpecialGLCode     =  ls_apitem-SpecialGLCode
+  ProfitCenter      =  ls_apitem-ProfitCenter
+  _currencyamount   =  CORRESPONDING #( lt_currencyamount )
+    )
+
+
+ ).
 
 
   ENDMETHOD.
